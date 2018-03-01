@@ -7,8 +7,10 @@
 //
 
 import UIKit
+import CoreLocation
+import Alamofire
 
-class WeatherVC: UIViewController, UIScrollViewDelegate {
+class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelegate {
 
     @IBOutlet weak var mainScrollView: UIScrollView!
     @IBOutlet weak var pageControl: UIPageControl!
@@ -20,11 +22,38 @@ class WeatherVC: UIViewController, UIScrollViewDelegate {
     @IBOutlet weak var timeScrollView: UIScrollView!
     @IBOutlet weak var timeLabel: UILabel!
     
+    var currentWeather: CurrentWeather!
+    var forecast: Forecast!
+    var forecasts = [Forecast]()
+    
+    let locationManager = CLLocationManager()
+    var currentLocation: CLLocation!
+    
+    override func viewDidAppear(_ animated: Bool) {
+        self.locationAuthStatus()
+    }
+    
+    func locationAuthStatus() {
+        if CLLocationManager.authorizationStatus() == .authorizedWhenInUse {
+            currentLocation = locationManager.location
+            Location.shareInstance.latitude = currentLocation.coordinate.latitude
+            Location.shareInstance.longitude = currentLocation.coordinate.longitude
+            
+            currentWeather.downloadWeatherDetails {
+                self.downloadForecastData {
+                    self.updateMainUI()
+                }
+            }
+        } else {
+            locationManager.requestWhenInUseAuthorization()
+            locationAuthStatus()
+        }
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         self.mainScrollView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height - 175)
         let scrollViewWidth: CGFloat = self.mainScrollView.frame.width
-        let scrollViewHeight: CGFloat = self.mainScrollView.frame.height
+        //let scrollViewHeight: CGFloat = self.mainScrollView.frame.height
         
         let imgOne = UIImageView(frame: CGRect(x: self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 25, width: 100, height: 100))
         imgOne.image = UIImage(named: "CloudLighting")
@@ -105,6 +134,13 @@ class WeatherVC: UIViewController, UIScrollViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startMonitoringSignificantLocationChanges()
+        
+        currentWeather = CurrentWeather()
+        
         self.mainScrollView.contentSize = CGSize(width: self.mainScrollView.frame.width * 4, height: self.mainScrollView.frame.height)
 
         self.dayScrollView.contentSize = CGSize(width: self.dayScrollView.frame.width * 3, height: self.dayScrollView.frame.height)
@@ -119,6 +155,29 @@ class WeatherVC: UIViewController, UIScrollViewDelegate {
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
+    }
+    
+    func downloadForecastData(completed: @escaping DownloadComplete) {
+        let forecastUrl = URL(string: FORECAST_URL)
+        Alamofire.request(forecastUrl!).responseJSON { response in
+            let result = response.result
+            
+            if let dict = result.value as? Dictionary<String, AnyObject> {
+                if let list = dict["list"] as? [Dictionary<String, AnyObject>] {
+                    for obj in list {
+                        let forecast = Forecast(weatherDict: obj)
+                        self.forecasts.append(forecast)
+                        print(obj)
+                    }
+                    self.forecasts.remove(at: 0)
+                }
+            }
+            completed()
+        }
+    }
+    
+    func updateMainUI() {
+        
     }
 }
 
