@@ -36,22 +36,54 @@ class WeatherVC: UIViewController, UIScrollViewDelegate {
         imgFour.image = UIImage(named: "Windy")
         
         let weatherType1 = UILabel()
-        weatherType1.text = "CLOUDY"
+        weatherType.text = "CLOUDY"
         weatherType1.textAlignment = .center
         weatherType1.frame = weatherType.frame
         weatherType1.center.x = self.view.center.x
+        weatherType1.attributedText = weatherType.attributedText
         
         let weatherType2 = UILabel()
-        weatherType2.text = "WINDY"
+        weatherType.text = "WINDY"
         weatherType2.textAlignment = .center
         weatherType2.frame = weatherType.frame
         weatherType2.center.x = self.view.center.x + scrollViewWidth
+        weatherType2.attributedText = weatherType.attributedText
         
-        let timeLabel2 = UILabel()
-        timeLabel2.text = "DAY"
+        let dayLabel1 = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
+        dayLabel.text = "SUNDAY"
+        dayLabel1.textAlignment = .center
+        dayLabel1.center.x = self.view.center.x
+        dayLabel1.attributedText = dayLabel.attributedText
+        
+        let dayLabel2 = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
+        dayLabel.text = "MONDAY"
+        dayLabel2.textAlignment = .center
+        dayLabel2.center.x = self.view.center.x + scrollViewWidth
+        dayLabel2.attributedText = dayLabel.attributedText
+        
+        let dayLabel3 = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
+        dayLabel.text = "TUESDAY"
+        dayLabel3.textAlignment = .center
+        dayLabel3.center.x = self.view.center.x + scrollViewWidth * 2
+        dayLabel3.attributedText = dayLabel.attributedText
+        
+        let timeLabel1 = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
+        dayLabel.text = "MORNING"
+        timeLabel1.textAlignment = .center
+        timeLabel1.center.x = self.view.center.x
+        timeLabel1.attributedText = dayLabel.attributedText
+        
+        let timeLabel2 = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
+        dayLabel.text = "DAY"
         timeLabel2.textAlignment = .center
-        timeLabel2.frame = timeLabel.frame
-        timeLabel2.center.x = self.view.center.x + self.timeScrollView.frame.width
+        timeLabel2.center.x = self.view.center.x + scrollViewWidth
+        timeLabel2.attributedText = dayLabel.attributedText
+        
+        let timeLabel3 = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
+        dayLabel.text = "NIGHT"
+        timeLabel3.textAlignment = .center
+        timeLabel3.center.x = self.view.center.x + scrollViewWidth * 2
+        timeLabel3.attributedText = dayLabel.attributedText
         
         self.mainScrollView.addSubview(imgOne)
         self.mainScrollView.addSubview(imgTwo)
@@ -60,16 +92,24 @@ class WeatherVC: UIViewController, UIScrollViewDelegate {
         
         self.mainScrollView.addSubview(weatherType1)
         self.mainScrollView.addSubview(weatherType2)
+        
+        self.dayScrollView.addSubview(dayLabel1)
+        self.dayScrollView.addSubview(dayLabel2)
+        self.dayScrollView.addSubview(dayLabel3)
+        
+        self.timeScrollView.addSubview(timeLabel1)
+        self.timeScrollView.addSubview(timeLabel2)
+        self.timeScrollView.addSubview(timeLabel3)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.mainScrollView.contentSize = CGSize(width: self.mainScrollView.frame.width * 4, height: self.mainScrollView.frame.height)
-        print(self.timeScrollView.frame.width)
-        self.timeScrollView.contentSize = CGSize(width: self.timeScrollView.frame.width * 4, height: self.timeScrollView.frame.height)
-        print(self.timeScrollView.frame.width)
+
+        self.dayScrollView.contentSize = CGSize(width: self.dayScrollView.frame.width * 3, height: self.dayScrollView.frame.height)
         
+        self.timeScrollView.contentSize = CGSize(width: self.timeScrollView.frame.width * 3, height: self.timeScrollView.frame.height)
         
         self.mainScrollView.delegate = self
         self.dayScrollView.delegate = self
@@ -84,8 +124,8 @@ class WeatherVC: UIViewController, UIScrollViewDelegate {
 
 extension WeatherVC
 {
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        let pageWidth: CGFloat = scrollView.frame.width
+    func scrollViewDidEndDecelerating(_ scrolled: UIScrollView) {
+        let pageWidth: CGFloat = mainScrollView.frame.width
         let currentPage: CGFloat = floor((mainScrollView.contentOffset.x - pageWidth/2)/pageWidth) + 1
         self.pageControl.currentPage = Int(currentPage);
     
@@ -103,18 +143,17 @@ extension WeatherVC
         }
     }
     
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    func scrollViewDidScroll(_ scrolled: UIScrollView) {
         
-        
-        if scrollView === mainScrollView {
+        if scrolled === mainScrollView {
             print("1")
-            scrollView.contentOffset = CGPoint(x: scrollView.contentOffset.x, y: 0)
-        } else if scrollView === dayScrollView {
+            mainScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
+        } else if scrolled === dayScrollView {
             print("2")
-            dayScrollView.contentOffset = CGPoint(x: scrollView.contentOffset.x, y: 0)
-        } else if scrollView == timeScrollView {
+            dayScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
+        } else if scrolled === timeScrollView {
             print("3")
-            timeScrollView.contentOffset = CGPoint(x: scrollView.contentOffset.x, y: 0)
+            timeScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
         }
     }
 }
