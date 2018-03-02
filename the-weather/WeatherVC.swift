@@ -10,7 +10,7 @@ import UIKit
 import CoreLocation
 import Alamofire
 
-class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelegate {
+class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelegate, UISearchBarDelegate {
 
     @IBOutlet weak var mainScrollView: UIScrollView!
     @IBOutlet weak var pageControl: UIPageControl!
@@ -23,6 +23,9 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var currentWeatherLabel: UILabel!
     
+    private var searchView: UIView!
+    private var searchBar: UISearchBar!
+    
     private var currentIndexDay: Int!
     private var currentIndexTime: Int!
     
@@ -30,6 +33,8 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     var forecast: Forecast!
     var forecasts = [Forecast]()
     
+    @IBOutlet weak var btnMenu: UIButton!
+    @IBOutlet weak var btnSearch: UIButton!
     let locationManager = CLLocationManager()
     var currentLocation: CLLocation!
     
@@ -41,6 +46,19 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     
     override func viewDidAppear(_ animated: Bool) {
         self.locationAuthStatus()
+    }
+    
+    @IBAction func btnMenuOnClick(_ sender: Any) {
+    
+    }
+    
+    @IBAction func btnSearchOnClick(_ sender: Any) {
+        print("search")
+        UIView.animate(withDuration: 0.7, delay: 0.1, options: .curveEaseIn, animations: {
+            self.searchView.frame.origin.y = 25
+        }, completion: { (Bool) in
+            //
+        })
     }
     
     func locationAuthStatus() {
@@ -62,7 +80,6 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     
     override func viewWillAppear(_ animated: Bool) {
         
-
     }
     
     override func viewDidLoad() {
@@ -111,6 +128,20 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         self.timeScrollView.contentSize = CGSize(width: self.timeScrollView.frame.width * 4, height: self.timeScrollView.frame.height)
     }
     
+    func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
+        // Do some search stuff
+    }
+    
+    func searchBarCancelButtonClicked(searchBar: UISearchBar) {
+        // Stop doing the search stuff
+        // and clear the text in the search bar
+        searchBar.text = ""
+        // Hide the cancel button
+        searchBar.showsCancelButton = false
+        // You could also change the position, frame etc of the searchBar
+        print("cancel")
+    }
+    
     func updateMainUI() {
         print("datanya: \(self.forecasts.count)")
         
@@ -118,6 +149,17 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         self.setCurrentWeather()
         
         cityLabel.text = cities[0]
+        
+        self.searchView = UIView(frame: CGRect(x: 0, y: self.view.frame.maxY, width: self.view.frame.width, height: self.view.frame.height))
+        self.searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 56))
+        self.searchView.backgroundColor = UIColor.white
+        self.searchBar.backgroundColor = UIColor.clear
+        self.searchBar.showsCancelButton = true
+
+        self.view.addSubview(searchView)
+        self.searchView.addSubview(searchBar)
+        
+        self.searchBar.delegate = self
         
         self.mainScrollView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height - 175)
         let scrollViewWidth: CGFloat = self.mainScrollView.frame.width
