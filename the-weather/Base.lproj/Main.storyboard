@@ -306,9 +306,10 @@
                     </view>
                     <connections>
                         <outlet property="cityLabel" destination="Hse-GQ-cMa" id="aMi-fd-85N"/>
+                        <outlet property="currentWeatherLabel" destination="JHQ-Et-agX" id="FKz-Uh-bzE"/>
                         <outlet property="dayLabel" destination="rvZ-xb-XoC" id="4Qh-3k-Z80"/>
                         <outlet property="dayScrollView" destination="JX8-PI-wXx" id="X1w-iL-Rrb"/>
-                        <outlet property="detailView" destination="150-9E-xvL" id="Hgt-gs-Oic"/>
+                        <outlet property="detailView" destination="150-9E-xvL" id="NLe-6T-bOP"/>
                         <outlet property="mainScrollView" destination="kUI-JE-Nbz" id="65H-RV-K5N"/>
                         <outlet property="pageControl" destination="NNd-x1-rAB" id="bkn-4e-SJA"/>
                         <outlet property="timeScrollView" destination="I8C-aO-b65" id="tCz-XF-CCt"/>

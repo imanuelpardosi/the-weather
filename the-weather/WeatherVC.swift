@@ -21,6 +21,7 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     @IBOutlet weak var dayLabel: UILabel!
     @IBOutlet weak var timeScrollView: UIScrollView!
     @IBOutlet weak var timeLabel: UILabel!
+    @IBOutlet weak var currentWeatherLabel: UILabel!
     
     var currentWeather: CurrentWeather!
     var forecast: Forecast!
@@ -28,6 +29,8 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     
     let locationManager = CLLocationManager()
     var currentLocation: CLLocation!
+    
+    let dayTimes: [String] = ["MORNING", "DAY", "EVENING", "NIGHT"]
     
     override func viewDidAppear(_ animated: Bool) {
         self.locationAuthStatus()
@@ -51,6 +54,60 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        
+
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startMonitoringSignificantLocationChanges()
+        
+        currentWeather = CurrentWeather()
+        
+        self.mainScrollView.delegate = self
+        self.dayScrollView.delegate = self
+        self.timeScrollView.delegate = self
+        self.pageControl.currentPage = 0
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
+    
+    func downloadForecastData(completed: @escaping DownloadComplete) {
+        let forecastUrl = URL(string: FORECAST_URL)
+        Alamofire.request(forecastUrl!).responseJSON { response in
+            let result = response.result
+            
+            if let dict = result.value as? Dictionary<String, AnyObject> {
+                if let list = dict["list"] as? [Dictionary<String, AnyObject>] {
+                    for obj in list {
+                        let forecast = Forecast(weatherDict: obj)
+                        if self.forecasts.count < 7 {
+                            self.forecasts.append(forecast)
+                        }
+                        print(obj)
+                    }
+                }
+            }
+            completed()
+        }
+    }
+    
+    func updateMainUI() {
+        print("datanya: \(self.forecasts.count)")
+        
+        self.mainScrollView.contentSize = CGSize(width: self.mainScrollView.frame.width * 4, height: self.mainScrollView.frame.height)
+        
+        self.dayScrollView.contentSize = CGSize(width: self.dayScrollView.frame.width * CGFloat(self.forecasts.count), height: self.dayScrollView.frame.height)
+        
+        self.timeScrollView.contentSize = CGSize(width: self.timeScrollView.frame.width * 4, height: self.timeScrollView.frame.height)
+        
+        
         self.mainScrollView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height - 175)
         let scrollViewWidth: CGFloat = self.mainScrollView.frame.width
         //let scrollViewHeight: CGFloat = self.mainScrollView.frame.height
@@ -78,106 +135,58 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         weatherType2.center.x = self.view.center.x + scrollViewWidth
         weatherType2.attributedText = weatherType.attributedText
         
-        let dayLabel1 = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
-        dayLabel.text = "SUNDAY"
-        dayLabel1.textAlignment = .center
-        dayLabel1.center.x = self.view.center.x
-        dayLabel1.attributedText = dayLabel.attributedText
+        var newDayLabelArr: [UILabel] = [UILabel]()
+        for i in 0..<forecasts.count {
+            print("i: \(i) \(forecasts[i].date)")
+            let newDayLabel = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
+            dayLabel.text = forecasts[i].date.uppercased()
+            newDayLabel.textAlignment = .center
+            newDayLabel.center.x = self.view.center.x + (scrollViewWidth * CGFloat(i))
+            newDayLabel.attributedText = dayLabel.attributedText
+            newDayLabelArr.append(newDayLabel)
+            
+            self.dayScrollView.addSubview(newDayLabelArr[i])
+        }
         
-        let dayLabel2 = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
-        dayLabel.text = "MONDAY"
-        dayLabel2.textAlignment = .center
-        dayLabel2.center.x = self.view.center.x + scrollViewWidth
-        dayLabel2.attributedText = dayLabel.attributedText
-        
-        let dayLabel3 = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
-        dayLabel.text = "TUESDAY"
-        dayLabel3.textAlignment = .center
-        dayLabel3.center.x = self.view.center.x + scrollViewWidth * 2
-        dayLabel3.attributedText = dayLabel.attributedText
-        
-        let timeLabel1 = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
-        dayLabel.text = "MORNING"
-        timeLabel1.textAlignment = .center
-        timeLabel1.center.x = self.view.center.x
-        timeLabel1.attributedText = dayLabel.attributedText
-        
-        let timeLabel2 = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
-        dayLabel.text = "DAY"
-        timeLabel2.textAlignment = .center
-        timeLabel2.center.x = self.view.center.x + scrollViewWidth
-        timeLabel2.attributedText = dayLabel.attributedText
-        
-        let timeLabel3 = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
-        dayLabel.text = "NIGHT"
-        timeLabel3.textAlignment = .center
-        timeLabel3.center.x = self.view.center.x + scrollViewWidth * 2
-        timeLabel3.attributedText = dayLabel.attributedText
-        
+        var newTimeLabelArr: [UILabel] = [UILabel]()
+        for i in 0..<dayTimes.count {
+            let newTimeLabel = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
+            dayLabel.text = dayTimes[i]
+            newTimeLabel.textAlignment = .center
+            newTimeLabel.center.x = self.view.center.x + (scrollViewWidth * CGFloat(i))
+            newTimeLabel.attributedText = dayLabel.attributedText
+            newTimeLabelArr.append(newTimeLabel)
+            
+            self.timeScrollView.addSubview(newTimeLabelArr[i])
+        }
+      
         self.mainScrollView.addSubview(imgOne)
         self.mainScrollView.addSubview(imgTwo)
         self.mainScrollView.addSubview(imgThree)
         self.mainScrollView.addSubview(imgFour)
         
+        self.mainScrollView.addSubview(detailView)
+        
         self.mainScrollView.addSubview(weatherType1)
         self.mainScrollView.addSubview(weatherType2)
-        
-        self.dayScrollView.addSubview(dayLabel1)
-        self.dayScrollView.addSubview(dayLabel2)
-        self.dayScrollView.addSubview(dayLabel3)
-        
-        self.timeScrollView.addSubview(timeLabel1)
-        self.timeScrollView.addSubview(timeLabel2)
-        self.timeScrollView.addSubview(timeLabel3)
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    func getCurrentTime() -> String {
+        var currentHour:Int
+        let date = NSDate()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH"
+        currentHour = Int(dateFormatter.string(from: date as Date))!
         
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.startMonitoringSignificantLocationChanges()
-        
-        currentWeather = CurrentWeather()
-        
-        self.mainScrollView.contentSize = CGSize(width: self.mainScrollView.frame.width * 4, height: self.mainScrollView.frame.height)
-
-        self.dayScrollView.contentSize = CGSize(width: self.dayScrollView.frame.width * 3, height: self.dayScrollView.frame.height)
-        
-        self.timeScrollView.contentSize = CGSize(width: self.timeScrollView.frame.width * 3, height: self.timeScrollView.frame.height)
-        
-        self.mainScrollView.delegate = self
-        self.dayScrollView.delegate = self
-        self.timeScrollView.delegate = self
-        self.pageControl.currentPage = 0
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-    }
-    
-    func downloadForecastData(completed: @escaping DownloadComplete) {
-        let forecastUrl = URL(string: FORECAST_URL)
-        Alamofire.request(forecastUrl!).responseJSON { response in
-            let result = response.result
-            
-            if let dict = result.value as? Dictionary<String, AnyObject> {
-                if let list = dict["list"] as? [Dictionary<String, AnyObject>] {
-                    for obj in list {
-                        let forecast = Forecast(weatherDict: obj)
-                        self.forecasts.append(forecast)
-                        print(obj)
-                    }
-                    self.forecasts.remove(at: 0)
-                }
-            }
-            completed()
+        if currentHour <= 12 && currentHour >= 6 {
+            return "morn"
+        } else if currentHour <= 17 {
+            return "day"
+        } else if currentHour <= 20 {
+            return "eve"
+        } else {
+            return "night"
         }
-    }
-    
-    func updateMainUI() {
-        
     }
 }
 
@@ -193,7 +202,7 @@ extension WeatherVC
         } else if Int(currentPage) == 1 {
             cityLabel.text = "PARIS"
         } else if Int(currentPage) == 2 {
-            cityLabel.text = "GERMANY"
+            cityLabel.text = "BERLIN"
         } else {
             cityLabel.text = "JAKARTA"
 //            UIView.animate(withDuration: 1.0, animations: { () -> Void in
@@ -203,16 +212,13 @@ extension WeatherVC
     }
     
     func scrollViewDidScroll(_ scrolled: UIScrollView) {
-        
         if scrolled === mainScrollView {
-            print("1")
             mainScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
         } else if scrolled === dayScrollView {
-            print("2")
             dayScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
         } else if scrolled === timeScrollView {
-            print("3")
             timeScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
+            self.pageControl.currentPage = 3
         }
     }
 }
