@@ -23,6 +23,9 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var currentWeatherLabel: UILabel!
     
+    private var currentIndexDay: Int!
+    private var currentIndexTime: Int!
+    
     var currentWeather: CurrentWeather!
     var forecast: Forecast!
     var forecasts = [Forecast]()
@@ -30,7 +33,11 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     let locationManager = CLLocationManager()
     var currentLocation: CLLocation!
     
+    var newWeatherTypeArr: [UILabel] = [UILabel]()
+    var newDayLabelArr: [UILabel] = [UILabel]()
+    var newTimeLabelArr: [UILabel] = [UILabel]()
     let dayTimes: [String] = ["MORNING", "DAY", "EVENING", "NIGHT"]
+    let cities: [String] = ["JAKARTA", "LONDON", "BERLIN", "PARIS"]
     
     override func viewDidAppear(_ animated: Bool) {
         self.locationAuthStatus()
@@ -98,15 +105,19 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         }
     }
     
+    func setupScrollViewSize() {
+        self.mainScrollView.contentSize = CGSize(width: self.mainScrollView.frame.width * 4, height: self.mainScrollView.frame.height)
+        self.dayScrollView.contentSize = CGSize(width: self.dayScrollView.frame.width * CGFloat(self.forecasts.count), height: self.dayScrollView.frame.height)
+        self.timeScrollView.contentSize = CGSize(width: self.timeScrollView.frame.width * 4, height: self.timeScrollView.frame.height)
+    }
+    
     func updateMainUI() {
         print("datanya: \(self.forecasts.count)")
         
-        self.mainScrollView.contentSize = CGSize(width: self.mainScrollView.frame.width * 4, height: self.mainScrollView.frame.height)
+        self.setupScrollViewSize()
+        self.setCurrentWeather()
         
-        self.dayScrollView.contentSize = CGSize(width: self.dayScrollView.frame.width * CGFloat(self.forecasts.count), height: self.dayScrollView.frame.height)
-        
-        self.timeScrollView.contentSize = CGSize(width: self.timeScrollView.frame.width * 4, height: self.timeScrollView.frame.height)
-        
+        cityLabel.text = cities[0]
         
         self.mainScrollView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height - 175)
         let scrollViewWidth: CGFloat = self.mainScrollView.frame.width
@@ -121,21 +132,30 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         let imgFour = UIImageView(frame: CGRect(x: scrollViewWidth * 3 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 25, width: 100, height: 100))
         imgFour.image = UIImage(named: "Windy")
         
-        let weatherType1 = UILabel()
-        weatherType.text = "CLOUDY"
-        weatherType1.textAlignment = .center
-        weatherType1.frame = weatherType.frame
-        weatherType1.center.x = self.view.center.x
-        weatherType1.attributedText = weatherType.attributedText
+        for i in 0..<cities.count {
+            if i == 0 {
+                let newWeatherType = UILabel()
+                weatherType.text = forecasts[0].weatherType.uppercased()
+                newWeatherType.textAlignment = .center
+                newWeatherType.frame = weatherType.frame
+                newWeatherType.center.x = self.view.center.x + (scrollViewWidth * CGFloat(i))
+                newWeatherType.attributedText = weatherType.attributedText
+                
+                self.newWeatherTypeArr.append(newWeatherType)
+                self.mainScrollView.addSubview(newWeatherTypeArr[i])
+            } else {
+                let newWeatherType = UILabel()
+                weatherType.text = "SOON"
+                newWeatherType.textAlignment = .center
+                newWeatherType.frame = weatherType.frame
+                newWeatherType.center.x = self.view.center.x + (scrollViewWidth * CGFloat(i))
+                newWeatherType.attributedText = weatherType.attributedText
+                
+                self.newWeatherTypeArr.append(newWeatherType)
+                self.mainScrollView.addSubview(newWeatherTypeArr[i])
+            }
+        }
         
-        let weatherType2 = UILabel()
-        weatherType.text = "WINDY"
-        weatherType2.textAlignment = .center
-        weatherType2.frame = weatherType.frame
-        weatherType2.center.x = self.view.center.x + scrollViewWidth
-        weatherType2.attributedText = weatherType.attributedText
-        
-        var newDayLabelArr: [UILabel] = [UILabel]()
         for i in 0..<forecasts.count {
             print("i: \(i) \(forecasts[i].date)")
             let newDayLabel = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
@@ -148,7 +168,6 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
             self.dayScrollView.addSubview(newDayLabelArr[i])
         }
         
-        var newTimeLabelArr: [UILabel] = [UILabel]()
         for i in 0..<dayTimes.count {
             let newTimeLabel = UILabel(frame: CGRect(x: 0, y: 13, width: 150, height: 25))
             dayLabel.text = dayTimes[i]
@@ -166,27 +185,58 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         self.mainScrollView.addSubview(imgFour)
         
         self.mainScrollView.addSubview(detailView)
-        
-        self.mainScrollView.addSubview(weatherType1)
-        self.mainScrollView.addSubview(weatherType2)
     }
     
-    func getCurrentTime() -> String {
+    func setWeatherType() {
+        if Int(pageControl.currentPage) == 0 {
+            weatherType.text = forecasts[currentIndexDay].weatherType.uppercased()
+            newWeatherTypeArr[Int(pageControl.currentPage)].attributedText = weatherType.attributedText
+        } else {
+            weatherType.text = "SOON"
+            newWeatherTypeArr[Int(pageControl.currentPage)].attributedText = weatherType.attributedText
+        }
+    }
+    
+    func setCurrentWeather() {
+        let currentHour = getCurrentTime()
+        
+        if currentIndexTime != nil {
+            if currentIndexTime == 0 {
+                currentWeatherLabel.text = forecasts[currentIndexDay].mornTemp
+            } else if currentIndexTime == 1 {
+                currentWeatherLabel.text = forecasts[currentIndexDay].dayTemp
+            } else if currentIndexTime == 2 {
+                currentWeatherLabel.text = forecasts[currentIndexDay].eveTemp
+            } else if currentIndexTime == 3 {
+                currentWeatherLabel.text = forecasts[currentIndexDay].nightTemp
+            }
+        } else {
+            if currentHour <= 12 && currentHour >= 6 {
+                currentWeatherLabel.text = forecasts[0].mornTemp
+            } else if currentHour <= 17 {
+                currentWeatherLabel.text = forecasts[0].dayTemp
+                let bottomOffset: CGPoint = CGPoint(x: self.timeScrollView.frame.width * 1, y: 0)
+                self.timeScrollView?.setContentOffset(bottomOffset, animated: true)
+            } else if currentHour <= 20 {
+                currentWeatherLabel.text = forecasts[0].eveTemp
+                let bottomOffset: CGPoint = CGPoint(x: self.timeScrollView.frame.width * 2, y: 0)
+                self.timeScrollView?.setContentOffset(bottomOffset, animated: true)
+            } else {
+                currentWeatherLabel.text = forecasts[0].nightTemp
+                let bottomOffset: CGPoint = CGPoint(x: self.timeScrollView.frame.width * 3, y: 0)
+                self.timeScrollView?.setContentOffset(bottomOffset, animated: true)
+            }
+        }
+    }
+    
+    func getCurrentTime() -> Int {
         var currentHour:Int
         let date = NSDate()
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH"
         currentHour = Int(dateFormatter.string(from: date as Date))!
         
-        if currentHour <= 12 && currentHour >= 6 {
-            return "morn"
-        } else if currentHour <= 17 {
-            return "day"
-        } else if currentHour <= 20 {
-            return "eve"
-        } else {
-            return "night"
-        }
+        return currentHour
     }
 }
 
@@ -196,19 +246,21 @@ extension WeatherVC
         let pageWidth: CGFloat = mainScrollView.frame.width
         let currentPage: CGFloat = floor((mainScrollView.contentOffset.x - pageWidth/2)/pageWidth) + 1
         self.pageControl.currentPage = Int(currentPage);
-    
+        
+        let curIdxDayScrollView = floor((dayScrollView.contentOffset.x - pageWidth/2)/pageWidth) + 1
+        self.currentIndexDay = Int(curIdxDayScrollView)
+        
+        let curIdxTimeScrollView = floor((timeScrollView.contentOffset.x - pageWidth/2)/pageWidth) + 1
+        self.currentIndexTime = Int(curIdxTimeScrollView)
+        
         if Int(currentPage) == 0 {
-            cityLabel.text = "LONDON"
-        } else if Int(currentPage) == 1 {
-            cityLabel.text = "PARIS"
-        } else if Int(currentPage) == 2 {
-            cityLabel.text = "BERLIN"
-        } else {
-            cityLabel.text = "JAKARTA"
-//            UIView.animate(withDuration: 1.0, animations: { () -> Void in
-//                self.startButton.alpha = 1.0
-//            })
+            //set forecast
         }
+    
+        cityLabel.text = cities[Int(currentPage)]
+        
+        self.setCurrentWeather()
+        self.setWeatherType()
     }
     
     func scrollViewDidScroll(_ scrolled: UIScrollView) {
@@ -218,7 +270,6 @@ extension WeatherVC
             dayScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
         } else if scrolled === timeScrollView {
             timeScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
-            self.pageControl.currentPage = 3
         }
     }
 }
