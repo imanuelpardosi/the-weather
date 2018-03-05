@@ -6,10 +6,80 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
+        <!--SearchVC-->
+        <scene sceneID="ui7-lp-ZQn">
+            <objects>
+                <viewController storyboardIdentifier="SearchVC" id="AhY-b5-Tuw" customClass="SearchVC" customModule="the_weather" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="OXS-6b-Z6v">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <searchBar contentMode="redraw" searchBarStyle="minimal" placeholder="Search city" translatesAutoresizingMaskIntoConstraints="NO" id="WAv-cW-0ZA">
+                                <rect key="frame" x="0.0" y="25" width="375" height="56"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="56" id="Jpa-YW-ybS"/>
+                                </constraints>
+                                <textInputTraits key="textInputTraits"/>
+                            </searchBar>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="eNp-O8-pxB">
+                                <rect key="frame" x="0.0" y="81" width="375" height="586"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="cityCell" id="wgp-jT-2HW" customClass="CityCell" customModule="the_weather" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="28" width="375" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="wgp-jT-2HW" id="Kec-Hr-1HX">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="y5u-cu-3p9">
+                                                    <rect key="frame" x="15" y="11" width="345" height="22"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="trailingMargin" secondItem="y5u-cu-3p9" secondAttribute="trailing" id="4aL-JP-buH"/>
+                                                <constraint firstItem="y5u-cu-3p9" firstAttribute="bottom" secondItem="Kec-Hr-1HX" secondAttribute="bottomMargin" id="CFJ-5u-mog"/>
+                                                <constraint firstItem="y5u-cu-3p9" firstAttribute="leading" secondItem="Kec-Hr-1HX" secondAttribute="leadingMargin" id="SXG-qV-3sY"/>
+                                                <constraint firstItem="y5u-cu-3p9" firstAttribute="top" secondItem="Kec-Hr-1HX" secondAttribute="topMargin" id="lH8-1Z-YQu"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <inset key="separatorInset" minX="15" minY="0.0" maxX="15" maxY="0.0"/>
+                                        <connections>
+                                            <outlet property="city" destination="y5u-cu-3p9" id="BFN-su-RVd"/>
+                                        </connections>
+                                    </tableViewCell>
+                                </prototypes>
+                            </tableView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="eNp-O8-pxB" firstAttribute="top" secondItem="WAv-cW-0ZA" secondAttribute="bottom" id="50V-6T-rwU"/>
+                            <constraint firstItem="WAv-cW-0ZA" firstAttribute="leading" secondItem="o8X-xr-G07" secondAttribute="leading" id="CnO-ga-qW9"/>
+                            <constraint firstItem="o8X-xr-G07" firstAttribute="bottom" secondItem="eNp-O8-pxB" secondAttribute="bottom" id="OD0-6M-9Hg"/>
+                            <constraint firstItem="o8X-xr-G07" firstAttribute="trailing" secondItem="eNp-O8-pxB" secondAttribute="trailing" id="b1v-q8-B1e"/>
+                            <constraint firstItem="WAv-cW-0ZA" firstAttribute="trailing" secondItem="o8X-xr-G07" secondAttribute="trailing" id="fP8-AL-gdL"/>
+                            <constraint firstItem="WAv-cW-0ZA" firstAttribute="top" secondItem="OXS-6b-Z6v" secondAttribute="top" constant="25" id="oIR-OS-0Zl"/>
+                            <constraint firstItem="eNp-O8-pxB" firstAttribute="leading" secondItem="o8X-xr-G07" secondAttribute="leading" id="w3I-YW-LrR"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="o8X-xr-G07"/>
+                    </view>
+                    <connections>
+                        <outlet property="searchBar" destination="WAv-cW-0ZA" id="vV1-dG-zm8"/>
+                        <outlet property="tableView" destination="eNp-O8-pxB" id="NtF-l6-u9G"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dwn-yh-gKS" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="876" y="104.7976011994003"/>
+        </scene>
         <!--WeatherVC-->
         <scene sceneID="tne-QT-ifu">
             <objects>
@@ -320,11 +390,20 @@
                         <outlet property="detailView" destination="150-9E-xvL" id="NLe-6T-bOP"/>
                         <outlet property="mainScrollView" destination="kUI-JE-Nbz" id="65H-RV-K5N"/>
                         <outlet property="pageControl" destination="NNd-x1-rAB" id="bkn-4e-SJA"/>
+                        <outlet property="searchDisplayController" destination="FhV-EO-mSR" id="DSo-zn-TLb"/>
                         <outlet property="timeScrollView" destination="I8C-aO-b65" id="tCz-XF-CCt"/>
                         <outlet property="weatherType" destination="flp-TG-xTr" id="14V-vN-RwF"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                <searchDisplayController id="FhV-EO-mSR">
+                    <connections>
+                        <outlet property="delegate" destination="BYZ-38-t0r" id="K4P-dZ-BZy"/>
+                        <outlet property="searchContentsController" destination="BYZ-38-t0r" id="fwS-QW-eGh"/>
+                        <outlet property="searchResultsDataSource" destination="BYZ-38-t0r" id="ln6-CT-y1A"/>
+                        <outlet property="searchResultsDelegate" destination="BYZ-38-t0r" id="frZ-hO-Tth"/>
+                    </connections>
+                </searchDisplayController>
             </objects>
             <point key="canvasLocation" x="68" y="105.66502463054188"/>
         </scene>

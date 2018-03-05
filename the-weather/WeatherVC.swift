@@ -10,7 +10,7 @@ import UIKit
 import CoreLocation
 import Alamofire
 
-class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelegate, UISearchBarDelegate {
+class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelegate {
 
     @IBOutlet weak var mainScrollView: UIScrollView!
     @IBOutlet weak var pageControl: UIPageControl!
@@ -22,9 +22,6 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     @IBOutlet weak var timeScrollView: UIScrollView!
     @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var currentWeatherLabel: UILabel!
-    
-    private var searchView: UIView!
-    private var searchBar: UISearchBar!
     
     private var currentIndexDay: Int!
     private var currentIndexTime: Int!
@@ -54,11 +51,10 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     
     @IBAction func btnSearchOnClick(_ sender: Any) {
         print("search")
-        UIView.animate(withDuration: 0.7, delay: 0.1, options: .curveEaseIn, animations: {
-            self.searchView.frame.origin.y = 25
-        }, completion: { (Bool) in
-            //
-        })
+        
+        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+        let newViewController = storyBoard.instantiateViewController(withIdentifier: "SearchVC") as! SearchVC
+        self.show(newViewController, sender: self)
     }
     
     func locationAuthStatus() {
@@ -128,20 +124,6 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         self.timeScrollView.contentSize = CGSize(width: self.timeScrollView.frame.width * 4, height: self.timeScrollView.frame.height)
     }
     
-    func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
-        // Do some search stuff
-    }
-    
-    func searchBarCancelButtonClicked(searchBar: UISearchBar) {
-        // Stop doing the search stuff
-        // and clear the text in the search bar
-        searchBar.text = ""
-        // Hide the cancel button
-        searchBar.showsCancelButton = false
-        // You could also change the position, frame etc of the searchBar
-        print("cancel")
-    }
-    
     func updateMainUI() {
         print("datanya: \(self.forecasts.count)")
         
@@ -149,17 +131,6 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         self.setCurrentWeather()
         
         cityLabel.text = cities[0]
-        
-        self.searchView = UIView(frame: CGRect(x: 0, y: self.view.frame.maxY, width: self.view.frame.width, height: self.view.frame.height))
-        self.searchBar = UISearchBar(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: 56))
-        self.searchView.backgroundColor = UIColor.white
-        self.searchBar.backgroundColor = UIColor.clear
-        self.searchBar.showsCancelButton = true
-
-        self.view.addSubview(searchView)
-        self.searchView.addSubview(searchBar)
-        
-        self.searchBar.delegate = self
         
         self.mainScrollView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height - 175)
         let scrollViewWidth: CGFloat = self.mainScrollView.frame.width
@@ -253,13 +224,14 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
                 currentWeatherLabel.text = forecasts[currentIndexDay].nightTemp
             }
         } else {
+            print(currentHour)
             if currentHour <= 12 && currentHour >= 6 {
                 currentWeatherLabel.text = forecasts[0].mornTemp
-            } else if currentHour <= 17 {
+            } else if currentHour <= 17 && currentHour >= 13 {
                 currentWeatherLabel.text = forecasts[0].dayTemp
                 let bottomOffset: CGPoint = CGPoint(x: self.timeScrollView.frame.width * 1, y: 0)
                 self.timeScrollView?.setContentOffset(bottomOffset, animated: true)
-            } else if currentHour <= 20 {
+            } else if currentHour <= 20 && currentHour >= 18 {
                 currentWeatherLabel.text = forecasts[0].eveTemp
                 let bottomOffset: CGPoint = CGPoint(x: self.timeScrollView.frame.width * 2, y: 0)
                 self.timeScrollView?.setContentOffset(bottomOffset, animated: true)
@@ -315,4 +287,3 @@ extension WeatherVC
         }
     }
 }
-
