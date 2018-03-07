@@ -8,8 +8,21 @@
 
 import Foundation
 import UIKit
+import GooglePlaces
 
-class SearchVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
+class SearchVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, GMSAutocompleteViewControllerDelegate {
+    func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
+        print(place)
+    }
+    
+    func viewController(_ viewController: GMSAutocompleteViewController, didFailAutocompleteWithError error: Error) {
+        print("Error")
+    }
+    
+    func wasCancelled(_ viewController: GMSAutocompleteViewController) {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var tableView: UITableView!
     
@@ -22,6 +35,10 @@ class SearchVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        let autoCompleteController = GMSAutocompleteViewController()
+        autoCompleteController.delegate = self
+        self.present(autoCompleteController, animated: true, completion: nil)
+        
         searchBar.delegate = self
         searchBar.returnKeyType = UIReturnKeyType.done
         tableView.delegate = self

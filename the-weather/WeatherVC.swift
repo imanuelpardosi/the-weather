@@ -9,13 +9,13 @@
 import UIKit
 import CoreLocation
 import Alamofire
+import GooglePlaces
 
-class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelegate {
+class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelegate, GMSAutocompleteViewControllerDelegate {
 
     @IBOutlet weak var mainScrollView: UIScrollView!
     @IBOutlet weak var pageControl: UIPageControl!
     @IBOutlet weak var weatherType: UILabel!
-    @IBOutlet weak var cityLabel: UILabel!
     @IBOutlet weak var detailView: UIView!
     @IBOutlet weak var dayScrollView: UIScrollView!
     @IBOutlet weak var dayLabel: UILabel!
@@ -127,10 +127,11 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     func updateMainUI() {
         print("datanya: \(self.forecasts.count)")
         
+        weatherType.frame.origin.y = 25
         self.setupScrollViewSize()
         self.setCurrentWeather()
         
-        cityLabel.text = cities[0]
+        self.navigationItem.title = cities[0]
         
         self.mainScrollView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height - 175)
         let scrollViewWidth: CGFloat = self.mainScrollView.frame.width
@@ -252,6 +253,24 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         
         return currentHour
     }
+    
+    @IBAction func onClickSearch(_ sender: Any) {
+        let autoCompleteController = GMSAutocompleteViewController()
+        autoCompleteController.delegate = self
+        self.present(autoCompleteController, animated: true, completion: nil)
+    }
+    
+    func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
+        print(place)
+    }
+    
+    func viewController(_ viewController: GMSAutocompleteViewController, didFailAutocompleteWithError error: Error) {
+        print(error)
+    }
+    
+    func wasCancelled(_ viewController: GMSAutocompleteViewController) {
+        self.dismiss(animated: true, completion: nil)
+    }
 }
 
 extension WeatherVC
@@ -271,7 +290,7 @@ extension WeatherVC
             //set forecast
         }
     
-        cityLabel.text = cities[Int(currentPage)]
+        self.navigationItem.title = cities[Int(currentPage)]
         
         self.setCurrentWeather()
         self.setWeatherType()
