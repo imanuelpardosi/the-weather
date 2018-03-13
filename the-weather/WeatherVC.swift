@@ -26,8 +26,6 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     private var currentIndexDay: Int!
     private var currentIndexTime: Int!
     
-    var currentWeather: CurrentWeather!
-    var forecast: Forecast!
     var forecasts = [Forecast]()
     
     @IBOutlet weak var btnMenu: UIButton!
@@ -42,7 +40,30 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     let cities: [String] = ["JAKARTA", "LONDON", "BERLIN", "PARIS"]
     
     override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         self.locationAuthStatus()
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startMonitoringSignificantLocationChanges()
+        
+        self.mainScrollView.delegate = self
+        self.dayScrollView.delegate = self
+        self.timeScrollView.delegate = self
+        self.pageControl.currentPage = 0
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
     }
     
     @IBAction func btnMenuOnClick(_ sender: Any) {
@@ -63,10 +84,8 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
             Location.shareInstance.latitude = currentLocation.coordinate.latitude
             Location.shareInstance.longitude = currentLocation.coordinate.longitude
             
-            currentWeather.downloadWeatherDetails {
-                self.downloadForecastData {
-                    self.updateMainUI()
-                }
+            self.downloadForecastData(lat: Location.shareInstance.latitude, long: Location.shareInstance.longitude) {
+                self.updateMainUI()
             }
         } else {
             locationManager.requestWhenInUseAuthorization()
@@ -74,32 +93,8 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         }
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.startMonitoringSignificantLocationChanges()
-        
-        currentWeather = CurrentWeather()
-        
-        self.mainScrollView.delegate = self
-        self.dayScrollView.delegate = self
-        self.timeScrollView.delegate = self
-        self.pageControl.currentPage = 0
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-    }
-    
-    func downloadForecastData(completed: @escaping DownloadComplete) {
-        let forecastUrl = URL(string: FORECAST_URL)
+    func downloadForecastData(lat: Double, long: Double, completed: @escaping DownloadComplete) {
+        let forecastUrl = URL(string: "\(BASE_URL)\(LATITUTE)\(lat)\(LONGITUDE)\(long)\(COUNT)\(MODE)\(APP_ID)\(APP_KEY)")
         Alamofire.request(forecastUrl!).responseJSON { response in
             let result = response.result
             
@@ -122,6 +117,9 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         self.mainScrollView.contentSize = CGSize(width: self.mainScrollView.frame.width * 4, height: self.mainScrollView.frame.height)
         self.dayScrollView.contentSize = CGSize(width: self.dayScrollView.frame.width * CGFloat(self.forecasts.count), height: self.dayScrollView.frame.height)
         self.timeScrollView.contentSize = CGSize(width: self.timeScrollView.frame.width * 4, height: self.timeScrollView.frame.height)
+        
+        print("content: \(self.dayScrollView.contentSize.width)")
+        print("content: \(self.timeScrollView.contentSize.width)")
     }
     
     func updateMainUI() {
@@ -262,6 +260,13 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     
     func viewController(_ viewController: GMSAutocompleteViewController, didAutocompleteWith place: GMSPlace) {
         print(place)
+        print(place.coordinate.latitude)
+        print(place.coordinate.longitude)
+        
+        self.downloadForecastData(lat: place.coordinate.latitude, long: place.coordinate.longitude) {
+            self.updateMainUI()
+        }
+        dismiss(animated: true, completion: nil)
     }
     
     func viewController(_ viewController: GMSAutocompleteViewController, didFailAutocompleteWithError error: Error) {
@@ -286,6 +291,9 @@ extension WeatherVC
         let curIdxTimeScrollView = floor((timeScrollView.contentOffset.x - pageWidth/2)/pageWidth) + 1
         self.currentIndexTime = Int(curIdxTimeScrollView)
         
+        print("day: \(self.currentIndexDay)")
+        print("time: \(self.currentIndexTime)")
+        
         if Int(currentPage) == 0 {
             //set forecast
         }
@@ -298,10 +306,13 @@ extension WeatherVC
     
     func scrollViewDidScroll(_ scrolled: UIScrollView) {
         if scrolled === mainScrollView {
+            print("main scoroll")
             mainScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
         } else if scrolled === dayScrollView {
+            print("day scoroll")
             dayScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
         } else if scrolled === timeScrollView {
+            print("time scoroll")
             timeScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
         }
     }

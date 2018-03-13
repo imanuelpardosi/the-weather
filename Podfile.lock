@@ -3,16 +3,19 @@ PODS:
   - GoogleMaps/Base (2.6.0)
   - GooglePlaces (2.6.0):
     - GoogleMaps/Base (= 2.6.0)
+  - TemperatureConverter (1.0.2)
 
 DEPENDENCIES:
   - Alamofire
   - GooglePlaces (~> 2.6)
+  - TemperatureConverter
 
 SPEC CHECKSUMS:
   Alamofire: f41a599bd63041760b26d393ec1069d9d7b917f4
   GoogleMaps: 42f91c68b7fa2f84d5c86597b18ceb99f5414c7f
   GooglePlaces: f6ddf33b75cef69e888907d9947c57198ed845f3
+  TemperatureConverter: 1c12a52bd7f838f296848de15b3f435cc4a52897
 
-PODFILE CHECKSUM: 0d76dffd0f5838a497a029c8960fdd0d812441c6
+PODFILE CHECKSUM: 027eeec1e424e1d7f94d1a061fc9edc6ba47f95b
 
 COCOAPODS: 1.4.0

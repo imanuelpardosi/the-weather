@@ -8,6 +8,7 @@ target 'the-weather' do
   # Pods for the-weather
   pod 'Alamofire'
   pod 'GooglePlaces', '~> 2.6'
+  pod 'TemperatureConverter'
 
   target 'the-weatherTests' do
     inherit! :search_paths

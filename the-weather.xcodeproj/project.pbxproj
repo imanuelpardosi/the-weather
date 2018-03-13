@@ -22,7 +22,6 @@
 		DBB08671204D3B320046B1FF /* CityCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBB08670204D3B320046B1FF /* CityCell.swift */; };
 		DBFBD28C2047B6800011897E /* Constant.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFBD28B2047B6800011897E /* Constant.swift */; };
 		DBFBD28E2047B6D50011897E /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFBD28D2047B6D50011897E /* Location.swift */; };
-		DBFBD2902047B74F0011897E /* CurrentWeather.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFBD28F2047B74F0011897E /* CurrentWeather.swift */; };
 		DBFBD2922047B7720011897E /* Forecast.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFBD2912047B7720011897E /* Forecast.swift */; };
 /* End PBXBuildFile section */
 
@@ -70,7 +69,6 @@
 		DBB08670204D3B320046B1FF /* CityCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityCell.swift; sourceTree = "<group>"; };
 		DBFBD28B2047B6800011897E /* Constant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constant.swift; sourceTree = "<group>"; };
 		DBFBD28D2047B6D50011897E /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
-		DBFBD28F2047B74F0011897E /* CurrentWeather.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentWeather.swift; sourceTree = "<group>"; };
 		DBFBD2912047B7720011897E /* Forecast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Forecast.swift; sourceTree = "<group>"; };
 		F1029DD548BCB2BB3832FDC3 /* Pods-the-weather.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-the-weather.release.xcconfig"; path = "Pods/Target Support Files/Pods-the-weather/Pods-the-weather.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -154,7 +152,6 @@
 				DB63527420464D1400FEF37D /* AppDelegate.swift */,
 				DBFBD28B2047B6800011897E /* Constant.swift */,
 				DBFBD28D2047B6D50011897E /* Location.swift */,
-				DBFBD28F2047B74F0011897E /* CurrentWeather.swift */,
 				DBFBD2912047B7720011897E /* Forecast.swift */,
 				DBB08670204D3B320046B1FF /* CityCell.swift */,
 				DBB0866C204D3A350046B1FF /* SearchVC.swift */,
@@ -465,10 +462,12 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-the-weather/Pods-the-weather-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
+				"${BUILT_PRODUCTS_DIR}/TemperatureConverter/TemperatureConverter.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TemperatureConverter.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -489,7 +488,6 @@
 				DBFBD28E2047B6D50011897E /* Location.swift in Sources */,
 				DBB08671204D3B320046B1FF /* CityCell.swift in Sources */,
 				DB63527520464D1400FEF37D /* AppDelegate.swift in Sources */,
-				DBFBD2902047B74F0011897E /* CurrentWeather.swift in Sources */,
 				DBFBD28C2047B6800011897E /* Constant.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
