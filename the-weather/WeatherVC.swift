@@ -6,6 +6,14 @@
 //  Copyright © 2018 moonshadow. All rights reserved.
 //
 
+enum CITY {
+    case current
+    case London
+    case Paris
+    case Berlin
+    case search
+}
+
 import UIKit
 import CoreLocation
 import Alamofire
@@ -27,6 +35,11 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     private var currentIndexTime: Int!
     
     var forecasts = [Forecast]()
+    var forecastsCurrentLocation = [Forecast]()
+    var forecastsLondon = [Forecast]()
+    var forecastsParis = [Forecast]()
+    var forecastsBerlin = [Forecast]()
+    var forecastsSearchCity = [Forecast]()
     
     @IBOutlet weak var btnMenu: UIButton!
     @IBOutlet weak var btnSearch: UIButton!
@@ -37,11 +50,13 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     var newDayLabelArr: [UILabel] = [UILabel]()
     var newTimeLabelArr: [UILabel] = [UILabel]()
     let dayTimes: [String] = ["MORNING", "DAY", "EVENING", "NIGHT"]
-    let cities: [String] = ["JAKARTA", "LONDON", "BERLIN", "PARIS"]
+    var cities: [String] = ["JAKARTA", "LONDON", "PARIS", "BERLIN"]
+    let coordinate: [(Double, Double)] = [(0.0, 0.0), (51.5073509, -0.1277583), (48.856614, 2.3522219),(52.5200066, 13.404954)]
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.locationAuthStatus()
+        
     }
     
     override func viewDidLoad() {
@@ -59,7 +74,7 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        
+
     }
     
     override func didReceiveMemoryWarning() {
@@ -83,9 +98,32 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
             currentLocation = locationManager.location
             Location.shareInstance.latitude = currentLocation.coordinate.latitude
             Location.shareInstance.longitude = currentLocation.coordinate.longitude
+
+            let geoCoder = CLGeocoder()
             
-            self.downloadForecastData(lat: Location.shareInstance.latitude, long: Location.shareInstance.longitude) {
-                self.updateMainUI()
+            geoCoder.reverseGeocodeLocation(currentLocation, completionHandler: { (placemarks, error) in
+                if error == nil {
+                    let placeArray = placemarks
+                    var placeMark: CLPlacemark!
+                    
+                    placeMark = placeArray?[0]
+                    
+                    if let city = placeMark.addressDictionary?["City"] as? NSString {
+                        self.cities[0] = city.uppercased
+                        print(city)
+                    }
+                }
+            })
+
+            self.downloadForecastData(lat: Location.shareInstance.latitude, long: Location.shareInstance.longitude, city: .current) {
+                self.downloadForecastData(lat: self.coordinate[1].0, long: self.coordinate[1].1, city: .London) {
+                    self.downloadForecastData(lat: self.coordinate[2].0, long: self.coordinate[2].1, city: .Paris) {
+                        self.downloadForecastData(lat: self.coordinate[3].0, long: self.coordinate[3].1, city: .Berlin) {
+                            self.forecasts = self.forecastsCurrentLocation
+                            self.updateMainUI()
+                        }
+                    }
+                }
             }
         } else {
             locationManager.requestWhenInUseAuthorization()
@@ -93,21 +131,35 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         }
     }
     
-    func downloadForecastData(lat: Double, long: Double, completed: @escaping DownloadComplete) {
+    func downloadForecastData(lat: Double, long: Double, city: CITY, completed: @escaping DownloadComplete) {
+        var data = [Forecast]()
         let forecastUrl = URL(string: "\(BASE_URL)\(LATITUTE)\(lat)\(LONGITUDE)\(long)\(COUNT)\(MODE)\(APP_ID)\(APP_KEY)")
+        print(forecastUrl)
         Alamofire.request(forecastUrl!).responseJSON { response in
             let result = response.result
             
             if let dict = result.value as? Dictionary<String, AnyObject> {
                 if let list = dict["list"] as? [Dictionary<String, AnyObject>] {
                     for obj in list {
-                        let forecast = Forecast(weatherDict: obj)
-                        if self.forecasts.count < 7 {
-                            self.forecasts.append(forecast)
+                        let newForecast = Forecast(weatherDict: obj)
+                        if data.count < 7 {
+                            data.append(newForecast)
                         }
                         print(obj)
                     }
                 }
+            }
+            
+            if city == .current {
+                self.forecastsCurrentLocation = data
+            } else if city == .London {
+                self.forecastsLondon = data
+            } else if city == .Paris {
+                self.forecastsParis = data
+            } else if city == .Berlin {
+                self.forecastsBerlin = data
+            } else if city == .search {
+                self.forecastsSearchCity = data
             }
             completed()
         }
@@ -117,9 +169,6 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         self.mainScrollView.contentSize = CGSize(width: self.mainScrollView.frame.width * 4, height: self.mainScrollView.frame.height)
         self.dayScrollView.contentSize = CGSize(width: self.dayScrollView.frame.width * CGFloat(self.forecasts.count), height: self.dayScrollView.frame.height)
         self.timeScrollView.contentSize = CGSize(width: self.timeScrollView.frame.width * 4, height: self.timeScrollView.frame.height)
-        
-        print("content: \(self.dayScrollView.contentSize.width)")
-        print("content: \(self.timeScrollView.contentSize.width)")
     }
     
     func updateMainUI() {
@@ -147,7 +196,7 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         for i in 0..<cities.count {
             if i == 0 {
                 let newWeatherType = UILabel()
-                weatherType.text = forecasts[0].weatherType.uppercased()
+                weatherType.text = forecastsCurrentLocation[0].weatherType.uppercased()
                 newWeatherType.textAlignment = .center
                 newWeatherType.frame = weatherType.frame
                 newWeatherType.center.x = self.view.center.x + (scrollViewWidth * CGFloat(i))
@@ -155,9 +204,29 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
                 
                 self.newWeatherTypeArr.append(newWeatherType)
                 self.mainScrollView.addSubview(newWeatherTypeArr[i])
-            } else {
+            } else if i == 1 {
                 let newWeatherType = UILabel()
-                weatherType.text = "SOON"
+                weatherType.text = forecastsLondon[0].weatherType.uppercased()
+                newWeatherType.textAlignment = .center
+                newWeatherType.frame = weatherType.frame
+                newWeatherType.center.x = self.view.center.x + (scrollViewWidth * CGFloat(i))
+                newWeatherType.attributedText = weatherType.attributedText
+                
+                self.newWeatherTypeArr.append(newWeatherType)
+                self.mainScrollView.addSubview(newWeatherTypeArr[i])
+            } else if i == 2 {
+                let newWeatherType = UILabel()
+                weatherType.text = forecastsParis[0].weatherType.uppercased()
+                newWeatherType.textAlignment = .center
+                newWeatherType.frame = weatherType.frame
+                newWeatherType.center.x = self.view.center.x + (scrollViewWidth * CGFloat(i))
+                newWeatherType.attributedText = weatherType.attributedText
+                
+                self.newWeatherTypeArr.append(newWeatherType)
+                self.mainScrollView.addSubview(newWeatherTypeArr[i])
+            } else if i == 3 {
+                let newWeatherType = UILabel()
+                weatherType.text = forecastsBerlin[0].weatherType.uppercased()
                 newWeatherType.textAlignment = .center
                 newWeatherType.frame = weatherType.frame
                 newWeatherType.center.x = self.view.center.x + (scrollViewWidth * CGFloat(i))
@@ -201,10 +270,16 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     
     func setWeatherType() {
         if Int(pageControl.currentPage) == 0 {
-            weatherType.text = forecasts[currentIndexDay].weatherType.uppercased()
+            weatherType.text = forecastsCurrentLocation[currentIndexDay].weatherType.uppercased()
             newWeatherTypeArr[Int(pageControl.currentPage)].attributedText = weatherType.attributedText
-        } else {
-            weatherType.text = "SOON"
+        } else if Int(pageControl.currentPage) == 1 {
+            weatherType.text = forecastsLondon[currentIndexDay].weatherType.uppercased()
+            newWeatherTypeArr[Int(pageControl.currentPage)].attributedText = weatherType.attributedText
+        } else if Int(pageControl.currentPage) == 2 {
+            weatherType.text = forecastsParis[currentIndexDay].weatherType.uppercased()
+            newWeatherTypeArr[Int(pageControl.currentPage)].attributedText = weatherType.attributedText
+        } else if Int(pageControl.currentPage) == 3 {
+            weatherType.text = forecastsBerlin[currentIndexDay].weatherType.uppercased()
             newWeatherTypeArr[Int(pageControl.currentPage)].attributedText = weatherType.attributedText
         }
     }
@@ -263,7 +338,7 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         print(place.coordinate.latitude)
         print(place.coordinate.longitude)
         
-        self.downloadForecastData(lat: place.coordinate.latitude, long: place.coordinate.longitude) {
+        self.downloadForecastData(lat: place.coordinate.latitude, long: place.coordinate.longitude, city: .search) {
             self.updateMainUI()
         }
         dismiss(animated: true, completion: nil)
@@ -291,11 +366,15 @@ extension WeatherVC
         let curIdxTimeScrollView = floor((timeScrollView.contentOffset.x - pageWidth/2)/pageWidth) + 1
         self.currentIndexTime = Int(curIdxTimeScrollView)
         
-        print("day: \(self.currentIndexDay)")
-        print("time: \(self.currentIndexTime)")
-        
         if Int(currentPage) == 0 {
-            //set forecast
+            forecasts = forecastsCurrentLocation
+            
+        } else if Int(currentPage) == 1 {
+            forecasts = forecastsLondon
+        } else if Int(currentPage) == 2 {
+            forecasts = forecastsParis
+        } else if Int(currentPage) == 3 {
+            forecasts = forecastsBerlin
         }
     
         self.navigationItem.title = cities[Int(currentPage)]
@@ -306,13 +385,10 @@ extension WeatherVC
     
     func scrollViewDidScroll(_ scrolled: UIScrollView) {
         if scrolled === mainScrollView {
-            print("main scoroll")
             mainScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
         } else if scrolled === dayScrollView {
-            print("day scoroll")
             dayScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
         } else if scrolled === timeScrollView {
-            print("time scoroll")
             timeScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
         }
     }

@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import TemperatureConverter
 
 class Forecast {
     var _date: String!
@@ -94,35 +95,29 @@ class Forecast {
     init(weatherDict: Dictionary<String, AnyObject>) {
         if let temp = weatherDict["temp"] as? Dictionary<String, AnyObject> {
             if let min = temp["min"] as? Double {
-                let kelvinToFahrenheitPreDevision = (min * (9/5) - 459.67)
-                let kelvinToFahrenheit = Double(round(10 * kelvinToFahrenheitPreDevision/10))
-                self._lowTemp = "\(kelvinToFahrenheit)°"
+                let tempConvert = TemperatureConverter(from: .kelvin, value: min)
+                self._lowTemp = "\(tempConvert.celsius)°"
             }
             if let max = temp["max"] as? Double {
-                let kelvinToFahrenheitPreDevision = (max * (9/5) - 459.67)
-                let kelvinToFahrenheit = Double(round(10 * kelvinToFahrenheitPreDevision/10))
-                self._highTemp = "\(kelvinToFahrenheit)°"
+                let tempConvert = TemperatureConverter(from: .kelvin, value: max)
+                self._highTemp = "\(tempConvert.celsius)°"
             }
             
             if let morn = temp["morn"] as? Double {
-                let kelvinToFahrenheitPreDevision = (morn * (9/5) - 459.67)
-                let kelvinToFahrenheit = Double(round(10 * kelvinToFahrenheitPreDevision/10))
-                self._mornTemp = "\(kelvinToFahrenheit)°"
+                let tempConvert = TemperatureConverter(from: .kelvin, value: morn)
+                self._mornTemp = "\(tempConvert.celsius)°"
             }
             if let day = temp["day"] as? Double {
-                let kelvinToFahrenheitPreDevision = (day * (9/5) - 459.67)
-                let kelvinToFahrenheit = Double(round(10 * kelvinToFahrenheitPreDevision/10))
-                self._dayTemp = "\(kelvinToFahrenheit)°"
+                let tempConvert = TemperatureConverter(from: .kelvin, value: day)
+                self._dayTemp = "\(tempConvert.celsius)°"
             }
             if let eve = temp["eve"] as? Double {
-                let kelvinToFahrenheitPreDevision = (eve * (9/5) - 459.67)
-                let kelvinToFahrenheit = Double(round(10 * kelvinToFahrenheitPreDevision/10))
-                self._eveTemp = "\(kelvinToFahrenheit)°"
+                let tempConvert = TemperatureConverter(from: .kelvin, value: eve)
+                self._eveTemp = "\(tempConvert.celsius)°"
             }
             if let night = temp["night"] as? Double {
-                let kelvinToFahrenheitPreDevision = (night * (9/5) - 459.67)
-                let kelvinToFahrenheit = Double(round(10 * kelvinToFahrenheitPreDevision/10))
-                self._nightTemp = "\(kelvinToFahrenheit)°"
+                let tempConvert = TemperatureConverter(from: .kelvin, value: night)
+                self._nightTemp = "\(tempConvert.celsius)°"
             }
         }
         
@@ -158,4 +153,3 @@ extension Date {
         return dateFormatter.string(from: self)
     }
 }
-

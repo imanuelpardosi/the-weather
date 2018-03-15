@@ -11,8 +11,8 @@ import Foundation
 let BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/daily?"
 let LATITUTE = "lat="
 let LONGITUDE = "&lon="
-let COUNT = "&cnt=10"
-let MODE = "&=json"
+let COUNT = "&cnt=7"
+let MODE = "&mode=json"
 let APP_ID = "&appid="
 let APP_KEY = "42a1771a0b787bf12e734ada0cfc80cb"
 
