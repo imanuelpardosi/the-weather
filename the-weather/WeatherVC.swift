@@ -50,7 +50,7 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     var newDayLabelArr: [UILabel] = [UILabel]()
     var newTimeLabelArr: [UILabel] = [UILabel]()
     let dayTimes: [String] = ["MORNING", "DAY", "EVENING", "NIGHT"]
-    var cities: [String] = ["JAKARTA", "LONDON", "PARIS", "BERLIN"]
+    var cities: [String] = ["JAKARTA", "LONDON", "PARIS", "BERLIN", ""]
     let coordinate: [(Double, Double)] = [(0.0, 0.0), (51.5073509, -0.1277583), (48.856614, 2.3522219),(52.5200066, 13.404954)]
     
     override func viewDidAppear(_ animated: Bool) {
@@ -110,6 +110,7 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
                     
                     if let city = placeMark.addressDictionary?["City"] as? NSString {
                         self.cities[0] = city.uppercased
+                        self.navigationItem.title = self.cities[0]
                         print(city)
                     }
                 }
@@ -166,7 +167,12 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     }
     
     func setupScrollViewSize() {
-        self.mainScrollView.contentSize = CGSize(width: self.mainScrollView.frame.width * 4, height: self.mainScrollView.frame.height)
+        print("count search city: \(forecastsSearchCity.count)")
+        if forecastsSearchCity.count == 0 {
+            self.mainScrollView.contentSize = CGSize(width: self.mainScrollView.frame.width * 4, height: self.mainScrollView.frame.height)
+        } else {
+            self.mainScrollView.contentSize = CGSize(width: self.mainScrollView.frame.width * 5, height: self.mainScrollView.frame.height)
+        }
         self.dayScrollView.contentSize = CGSize(width: self.dayScrollView.frame.width * CGFloat(self.forecasts.count), height: self.dayScrollView.frame.height)
         self.timeScrollView.contentSize = CGSize(width: self.timeScrollView.frame.width * 4, height: self.timeScrollView.frame.height)
     }
@@ -177,8 +183,6 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         weatherType.frame.origin.y = 25
         self.setupScrollViewSize()
         self.setCurrentWeather()
-        
-        self.navigationItem.title = cities[0]
         
         self.mainScrollView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height - 175)
         let scrollViewWidth: CGFloat = self.mainScrollView.frame.width
@@ -192,8 +196,11 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         imgThree.image = UIImage(named: "Rainy")
         let imgFour = UIImageView(frame: CGRect(x: scrollViewWidth * 3 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 25, width: 100, height: 100))
         imgFour.image = UIImage(named: "Windy")
+        let imgFive = UIImageView(frame: CGRect(x: scrollViewWidth * 4 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 25, width: 100, height: 100))
+        imgFive.image = UIImage(named: "Rainy")
         
-        for i in 0..<cities.count {
+        
+        for i in 0..<pageControl.numberOfPages {
             if i == 0 {
                 let newWeatherType = UILabel()
                 weatherType.text = forecastsCurrentLocation[0].weatherType.uppercased()
@@ -234,6 +241,17 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
                 
                 self.newWeatherTypeArr.append(newWeatherType)
                 self.mainScrollView.addSubview(newWeatherTypeArr[i])
+            } else if i == 4 {
+                print(" forecastsSearchCity[0].weatherType.uppercased(): \( forecastsSearchCity[0].weatherType.uppercased())")
+                let newWeatherType = UILabel()
+                weatherType.text = forecastsSearchCity[0].weatherType.uppercased()
+                newWeatherType.textAlignment = .center
+                newWeatherType.frame = weatherType.frame
+                newWeatherType.center.x = self.view.center.x + (scrollViewWidth * 1.5)
+                newWeatherType.attributedText = weatherType.attributedText
+                
+                self.newWeatherTypeArr.append(newWeatherType)
+                self.mainScrollView.addSubview(newWeatherTypeArr[i])
             }
         }
         
@@ -264,6 +282,7 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         self.mainScrollView.addSubview(imgTwo)
         self.mainScrollView.addSubview(imgThree)
         self.mainScrollView.addSubview(imgFour)
+        self.mainScrollView.addSubview(imgFive)
         
         self.mainScrollView.addSubview(detailView)
     }
@@ -280,6 +299,9 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
             newWeatherTypeArr[Int(pageControl.currentPage)].attributedText = weatherType.attributedText
         } else if Int(pageControl.currentPage) == 3 {
             weatherType.text = forecastsBerlin[currentIndexDay].weatherType.uppercased()
+            newWeatherTypeArr[Int(pageControl.currentPage)].attributedText = weatherType.attributedText
+        }  else if Int(pageControl.currentPage) == 4 {
+            weatherType.text = forecastsSearchCity[currentIndexDay].weatherType.uppercased()
             newWeatherTypeArr[Int(pageControl.currentPage)].attributedText = weatherType.attributedText
         }
     }
@@ -339,6 +361,14 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         print(place.coordinate.longitude)
         
         self.downloadForecastData(lat: place.coordinate.latitude, long: place.coordinate.longitude, city: .search) {
+            self.pageControl.numberOfPages = 5
+            self.pageControl.currentPage = 4
+            
+            let offset: CGPoint = CGPoint(x: self.mainScrollView.frame.width * 5, y: 0)
+            self.mainScrollView?.setContentOffset(offset, animated: true)
+            
+            self.cities[4] = place.name.uppercased()
+            
             self.updateMainUI()
         }
         dismiss(animated: true, completion: nil)
@@ -375,6 +405,8 @@ extension WeatherVC
             forecasts = forecastsParis
         } else if Int(currentPage) == 3 {
             forecasts = forecastsBerlin
+        } else if Int(currentPage) == 4 {
+            forecasts = forecastsSearchCity
         }
     
         self.navigationItem.title = cities[Int(currentPage)]
