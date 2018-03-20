@@ -108,7 +108,7 @@
                                     <constraint firstAttribute="height" constant="52" id="rkD-N7-bnC"/>
                                 </constraints>
                             </scrollView>
-                            <pageControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" numberOfPages="4" translatesAutoresizingMaskIntoConstraints="NO" id="NNd-x1-rAB">
+                            <pageControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" numberOfPages="5" translatesAutoresizingMaskIntoConstraints="NO" id="NNd-x1-rAB">
                                 <rect key="frame" x="160" y="340" width="0.0" height="37"/>
                                 <color key="pageIndicatorTintColor" red="0.3369360066" green="0.78029015560000003" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="currentPageIndicatorTintColor" red="0.3826935279" green="0.3826935279" blue="0.3826935279" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
