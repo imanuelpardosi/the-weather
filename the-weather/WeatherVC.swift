@@ -43,9 +43,11 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     
     @IBOutlet weak var btnMenu: UIButton!
     @IBOutlet weak var btnSearch: UIButton!
-    let locationManager = CLLocationManager()
+    var locationManager = CLLocationManager()
     var currentLocation: CLLocation!
     
+    @IBOutlet weak var slideMenu: UIView!
+    @IBOutlet weak var slideMenuLeftMargin: NSLayoutConstraint!
     var newWeatherTypeArr: [UILabel] = [UILabel]()
     var newDayLabelArr: [UILabel] = [UILabel]()
     var newTimeLabelArr: [UILabel] = [UILabel]()
@@ -53,25 +55,38 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     var cities: [String] = ["JAKARTA", "LONDON", "PARIS", "BERLIN", "SEARCH CITY"]
     let coordinate: [(Double, Double)] = [(0.0, 0.0), (51.5073509, -0.1277583), (48.856614, 2.3522219),(52.5200066, 13.404954)]
     
+    var isGetDataFinish: Bool = Bool()
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.locationAuthStatus()
-        
+        self.slideMenuLeftMargin.constant = -self.slideMenu.frame.width
+
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestWhenInUseAuthorization()
-        locationManager.startMonitoringSignificantLocationChanges()
+        locationManager.startUpdatingLocation()
         
         self.mainScrollView.delegate = self
         self.dayScrollView.delegate = self
         self.timeScrollView.delegate = self
         self.pageControl.currentPage = 0
+        
+        let leftButton = UIBarButtonItem(image: UIImage(named: "icons-menu"), style: .plain, target: self, action: #selector(btnMenuOnClick))
+        self.navigationItem.leftBarButtonItem  = leftButton
+        
+        let rightButton = UIBarButtonItem(image: UIImage(named: "icons-search"), style: .plain, target: self, action: #selector(onClickSearch))
+        self.navigationItem.rightBarButtonItem  = rightButton
+    }
+    
+    @objc func btnMenuOnClick(){
+        self.slideMenuLeftMargin.constant = 0
+        self.slideMenu.isHidden = false
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -82,22 +97,15 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         super.didReceiveMemoryWarning()
     }
     
-    @IBAction func btnMenuOnClick(_ sender: Any) {
-    
-    }
-    
-    @IBAction func btnSearchOnClick(_ sender: Any) {
-        let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-        let newViewController = storyBoard.instantiateViewController(withIdentifier: "SearchVC") as! SearchVC
-        self.show(newViewController, sender: self)
-    }
-    
-    func locationAuthStatus() {
-        if CLLocationManager.authorizationStatus() == .authorizedWhenInUse {
-            currentLocation = locationManager.location
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation])
+    {
+        if !isGetDataFinish {
+            self.isGetDataFinish = true
+            currentLocation = locations[0]
+            
             Location.shareInstance.latitude = currentLocation.coordinate.latitude
             Location.shareInstance.longitude = currentLocation.coordinate.longitude
-
+            
             let geoCoder = CLGeocoder()
             
             geoCoder.reverseGeocodeLocation(currentLocation, completionHandler: { (placemarks, error) in
@@ -114,7 +122,44 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
                     }
                 }
             })
-
+            
+            self.downloadForecastData(lat: Location.shareInstance.latitude, long: Location.shareInstance.longitude, city: .current) {
+                self.downloadForecastData(lat: self.coordinate[1].0, long: self.coordinate[1].1, city: .London) {
+                    self.downloadForecastData(lat: self.coordinate[2].0, long: self.coordinate[2].1, city: .Paris) {
+                        self.downloadForecastData(lat: self.coordinate[3].0, long: self.coordinate[3].1, city: .Berlin) {
+                            self.forecasts = self.forecastsCurrentLocation
+                            self.updateMainUI()
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func locationAuthStatus() {
+        if CLLocationManager.authorizationStatus() == .authorizedWhenInUse {
+            currentLocation = locationManager.location
+            
+            Location.shareInstance.latitude = currentLocation.coordinate.latitude
+            Location.shareInstance.longitude = currentLocation.coordinate.longitude
+            
+            let geoCoder = CLGeocoder()
+            
+            geoCoder.reverseGeocodeLocation(currentLocation, completionHandler: { (placemarks, error) in
+                if error == nil {
+                    let placeArray = placemarks
+                    var placeMark: CLPlacemark!
+                    
+                    placeMark = placeArray?[0]
+                    
+                    if let city = placeMark.addressDictionary?["City"] as? NSString {
+                        self.cities[0] = city.uppercased
+                        self.navigationItem.title = self.cities[0]
+                        print(city)
+                    }
+                }
+            })
+            
             self.downloadForecastData(lat: Location.shareInstance.latitude, long: Location.shareInstance.longitude, city: .current) {
                 self.downloadForecastData(lat: self.coordinate[1].0, long: self.coordinate[1].1, city: .London) {
                     self.downloadForecastData(lat: self.coordinate[2].0, long: self.coordinate[2].1, city: .Paris) {
