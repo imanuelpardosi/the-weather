@@ -6,6 +6,11 @@
 //  Copyright © 2018 moonshadow. All rights reserved.
 //
 
+protocol WeatherDelegate: class {
+    func sendTemperature(temp: [String])
+    func doSomething()
+}
+
 enum CITY {
     case current
     case London
@@ -18,6 +23,7 @@ import UIKit
 import CoreLocation
 import Alamofire
 import GooglePlaces
+import JGProgressHUD
 
 class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelegate, GMSAutocompleteViewControllerDelegate {
 
@@ -46,8 +52,6 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     var locationManager = CLLocationManager()
     var currentLocation: CLLocation!
     
-    @IBOutlet weak var slideMenu: UIView!
-    @IBOutlet weak var slideMenuLeftMargin: NSLayoutConstraint!
     var newWeatherTypeArr: [UILabel] = [UILabel]()
     var newDayLabelArr: [UILabel] = [UILabel]()
     var newTimeLabelArr: [UILabel] = [UILabel]()
@@ -57,16 +61,17 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     
     var isGetDataFinish: Bool = Bool()
     
+    weak var weatherDelegate: WeatherDelegate?
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.slideMenuLeftMargin.constant = -self.slideMenu.frame.width
-
+        self.view.showBlurLoader()
+        
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestWhenInUseAuthorization()
@@ -76,17 +81,39 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         self.dayScrollView.delegate = self
         self.timeScrollView.delegate = self
         self.pageControl.currentPage = 0
-        
-        let leftButton = UIBarButtonItem(image: UIImage(named: "icons-menu"), style: .plain, target: self, action: #selector(btnMenuOnClick))
-        self.navigationItem.leftBarButtonItem  = leftButton
-        
-        let rightButton = UIBarButtonItem(image: UIImage(named: "icons-search"), style: .plain, target: self, action: #selector(onClickSearch))
-        self.navigationItem.rightBarButtonItem  = rightButton
     }
     
-    @objc func btnMenuOnClick(){
-        self.slideMenuLeftMargin.constant = 0
-        self.slideMenu.isHidden = false
+    func getCities() -> [String] {
+        return cities
+    }
+    
+    func getTemperature() -> [String] {
+        var result: [String] = [String]()
+        let currentHour = self.getCurrentTime()
+        
+        if currentHour <= 12 && currentHour >= 6 {
+            result.append(forecastsCurrentLocation[0].mornTemp)
+            result.append(forecastsLondon[0].mornTemp)
+            result.append(forecastsParis[0].mornTemp)
+            result.append(forecastsBerlin[0].mornTemp)
+        } else if currentHour <= 17 && currentHour >= 13 {
+            result.append(forecastsCurrentLocation[0].dayTemp)
+            result.append(forecastsLondon[0].dayTemp)
+            result.append(forecastsParis[0].dayTemp)
+            result.append(forecastsBerlin[0].dayTemp)
+        } else if currentHour <= 20 && currentHour >= 18 {
+            result.append(forecastsCurrentLocation[0].eveTemp)
+            result.append(forecastsLondon[0].eveTemp)
+            result.append(forecastsParis[0].eveTemp)
+            result.append(forecastsBerlin[0].eveTemp)
+        } else {
+            result.append(forecastsCurrentLocation[0].nightTemp)
+            result.append(forecastsLondon[0].nightTemp)
+            result.append(forecastsParis[0].nightTemp)
+            result.append(forecastsBerlin[0].nightTemp)
+        }
+        
+        return result
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -123,12 +150,22 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
                 }
             })
             
+            let hud = JGProgressHUD(style: .light)
+            hud.textLabel.text = "LOADING"
+            hud.textLabel.font = UIFont(name: "Helvetica", size: 15)
+            hud.textLabel.textColor = #colorLiteral(red: 0.4834194183, green: 0.4834313393, blue: 0.483424902, alpha: 1)
+            hud.show(in: self.view)
+            
             self.downloadForecastData(lat: Location.shareInstance.latitude, long: Location.shareInstance.longitude, city: .current) {
                 self.downloadForecastData(lat: self.coordinate[1].0, long: self.coordinate[1].1, city: .London) {
                     self.downloadForecastData(lat: self.coordinate[2].0, long: self.coordinate[2].1, city: .Paris) {
                         self.downloadForecastData(lat: self.coordinate[3].0, long: self.coordinate[3].1, city: .Berlin) {
                             self.forecasts = self.forecastsCurrentLocation
+                            hud.dismiss(afterDelay: 0.3)
                             self.updateMainUI()
+                            self.view.removeBluerLoader()
+                            self.weatherDelegate?.doSomething()
+                            self.weatherDelegate?.sendTemperature(temp: self.getTemperature())
                         }
                     }
                 }
@@ -179,34 +216,42 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     func downloadForecastData(lat: Double, long: Double, city: CITY, completed: @escaping DownloadComplete) {
         var data = [Forecast]()
         let forecastUrl = URL(string: "\(BASE_URL)\(LATITUTE)\(lat)\(LONGITUDE)\(long)\(COUNT)\(MODE)\(APP_ID)\(APP_KEY)")
-        print(forecastUrl)
+
         Alamofire.request(forecastUrl!).responseJSON { response in
             let result = response.result
             
-            if let dict = result.value as? Dictionary<String, AnyObject> {
-                if let list = dict["list"] as? [Dictionary<String, AnyObject>] {
-                    for obj in list {
-                        let newForecast = Forecast(weatherDict: obj)
-                        if data.count < 7 {
-                            data.append(newForecast)
+            if result.isSuccess {
+                if let dict = result.value as? Dictionary<String, AnyObject> {
+                    if let list = dict["list"] as? [Dictionary<String, AnyObject>] {
+                        for obj in list {
+                            let newForecast = Forecast(weatherDict: obj)
+                            if data.count < 7 {
+                                data.append(newForecast)
+                            }
+                            print(obj)
                         }
-                        print(obj)
                     }
                 }
+                
+                if city == .current {
+                    self.forecastsCurrentLocation = data
+                } else if city == .London {
+                    self.forecastsLondon = data
+                } else if city == .Paris {
+                    self.forecastsParis = data
+                } else if city == .Berlin {
+                    self.forecastsBerlin = data
+                } else if city == .search {
+                    self.forecastsSearchCity = data
+                }
+                completed()
+            } else {
+                let hud = JGProgressHUD(style: .light)
+                hud.textLabel.text = "NO NETWORK CONNECTION."
+                hud.textLabel.font = UIFont(name: "Helvetica", size: 15)
+                hud.textLabel.textColor = #colorLiteral(red: 0.4834194183, green: 0.4834313393, blue: 0.483424902, alpha: 1)
+                hud.show(in: self.view)
             }
-            
-            if city == .current {
-                self.forecastsCurrentLocation = data
-            } else if city == .London {
-                self.forecastsLondon = data
-            } else if city == .Paris {
-                self.forecastsParis = data
-            } else if city == .Berlin {
-                self.forecastsBerlin = data
-            } else if city == .search {
-                self.forecastsSearchCity = data
-            }
-            completed()
         }
     }
     
@@ -217,7 +262,7 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     }
     
     func updateMainUI() {
-        weatherType.frame.origin.y = 25
+        //weatherType.frame.origin.y = 25
         self.setupScrollViewSize()
         self.setCurrentWeather()
        
@@ -225,15 +270,15 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         let scrollViewWidth: CGFloat = self.mainScrollView.frame.width
         //let scrollViewHeight: CGFloat = self.mainScrollView.frame.height
         
-        let imgOne = UIImageView(frame: CGRect(x: self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 25, width: 100, height: 100))
+        let imgOne = UIImageView(frame: CGRect(x: self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
         imgOne.image = UIImage(named: "CloudLighting")
-        let imgTwo = UIImageView(frame: CGRect(x: scrollViewWidth + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 25, width: 100, height: 100))
+        let imgTwo = UIImageView(frame: CGRect(x: scrollViewWidth + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
         imgTwo.image = UIImage(named: "LightRain")
-        let imgThree = UIImageView(frame: CGRect(x:scrollViewWidth * 2 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 25, width: 100, height: 100))
+        let imgThree = UIImageView(frame: CGRect(x:scrollViewWidth * 2 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
         imgThree.image = UIImage(named: "Rainy")
-        let imgFour = UIImageView(frame: CGRect(x: scrollViewWidth * 3 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 25, width: 100, height: 100))
+        let imgFour = UIImageView(frame: CGRect(x: scrollViewWidth * 3 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
         imgFour.image = UIImage(named: "Windy")
-        let imgFive = UIImageView(frame: CGRect(x: scrollViewWidth * 4 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 25, width: 100, height: 100))
+        let imgFive = UIImageView(frame: CGRect(x: scrollViewWidth * 4 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
         imgFive.image = UIImage(named: "Rainy")
         
         
@@ -280,7 +325,7 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
                 self.mainScrollView.addSubview(newWeatherTypeArr[i])
             } else if i == 4 {
                 let newWeatherType = UILabel()
-                weatherType.text = "Please choose search menu..."
+                weatherType.text = "HOW'S YOUR FAVORITE CITY?"
                 newWeatherType.textAlignment = .center
                 newWeatherType.frame = weatherType.frame
                 newWeatherType.center.x = self.view.center.x + (scrollViewWidth * CGFloat(i))
@@ -466,6 +511,22 @@ extension WeatherVC
             dayScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
         } else if scrolled === timeScrollView {
             timeScrollView.contentOffset = CGPoint(x: scrolled.contentOffset.x, y: 0)
+        }
+    }
+}
+
+extension UIView {
+    func showBlurLoader() {
+        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.extraLight)
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        blurEffectView.frame = self.bounds
+        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        self.addSubview(blurEffectView)
+    }
+    
+    func removeBluerLoader() {
+        self.subviews.flatMap {  $0 as? UIVisualEffectView }.forEach {
+            $0.removeFromSuperview()
         }
     }
 }

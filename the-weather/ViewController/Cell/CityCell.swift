@@ -8,9 +8,11 @@
 
 import UIKit
 
-class CityCell: UITableViewCell {
+class CityCell: UICollectionViewCell {
 
     @IBOutlet weak var city: UILabel!
+    @IBOutlet weak var weatherImage: UIImageView!
+    @IBOutlet weak var temperature: UILabel!
     
     func configureCell(data: String) {
         self.city.text = data

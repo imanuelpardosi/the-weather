@@ -1,21 +1,27 @@
 PODS:
+  - AKSideMenu (1.4.1)
   - Alamofire (4.7.0)
   - GoogleMaps/Base (2.6.0)
   - GooglePlaces (2.6.0):
     - GoogleMaps/Base (= 2.6.0)
+  - JGProgressHUD (2.0.1)
   - TemperatureConverter (1.0.3)
 
 DEPENDENCIES:
+  - AKSideMenu
   - Alamofire
   - GooglePlaces (~> 2.6)
+  - JGProgressHUD
   - TemperatureConverter
 
 SPEC CHECKSUMS:
+  AKSideMenu: 5f253516c339960e474f81c3da53540368520be5
   Alamofire: 907e0a98eb68cdb7f9d1f541a563d6ac5dc77b25
   GoogleMaps: 42f91c68b7fa2f84d5c86597b18ceb99f5414c7f
   GooglePlaces: f6ddf33b75cef69e888907d9947c57198ed845f3
+  JGProgressHUD: 63ad7d8850702a91625fb9ed8e94eab706c03d81
   TemperatureConverter: 457987c2bd3df53bffbace0b3e7c74ad062f493c
 
-PODFILE CHECKSUM: 027eeec1e424e1d7f94d1a061fc9edc6ba47f95b
+PODFILE CHECKSUM: cb75dd47b395295e1bdfa1994bd0cc06795cf449
 
 COCOAPODS: 1.4.0

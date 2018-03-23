@@ -9,6 +9,8 @@ target 'the-weather' do
   pod 'Alamofire'
   pod 'GooglePlaces', '~> 2.6'
   pod 'TemperatureConverter'
+  pod 'AKSideMenu'
+  pod 'JGProgressHUD'
 
   target 'the-weatherTests' do
     inherit! :search_paths

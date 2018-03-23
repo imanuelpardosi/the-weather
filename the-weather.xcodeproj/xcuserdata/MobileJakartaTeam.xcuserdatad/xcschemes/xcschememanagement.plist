@@ -7,7 +7,25 @@
 		<key>the-weather.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>5</integer>
+			<integer>7</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>DB63527020464D1400FEF37D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>DB63528720464D1500FEF37D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>DB63529220464D1500FEF37D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>

@@ -19,6 +19,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
+        UINavigationBar.appearance().shadowImage = UIImage()
+        UINavigationBar.appearance().barTintColor = #colorLiteral(red: 0.9688121676, green: 0.9688346982, blue: 0.9688225389, alpha: 1)
+        UINavigationBar.appearance().isTranslucent = false
+        UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default)
+        
         GMSPlacesClient.provideAPIKey("AIzaSyBqhl5SYYO3tux_V58y8clJ765eXvQJmUM")
         return true
     }

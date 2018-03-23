@@ -96,28 +96,28 @@ class Forecast {
         if let temp = weatherDict["temp"] as? Dictionary<String, AnyObject> {
             if let min = temp["min"] as? Double {
                 let tempConvert = TemperatureConverter(from: .kelvin, value: min)
-                self._lowTemp = "\(tempConvert.celsius)°"
+                self._lowTemp = "\(Int(tempConvert.celsius))°"
             }
             if let max = temp["max"] as? Double {
                 let tempConvert = TemperatureConverter(from: .kelvin, value: max)
-                self._highTemp = "\(tempConvert.celsius)°"
+                self._highTemp = "\(Int(tempConvert.celsius))°"
             }
             
             if let morn = temp["morn"] as? Double {
                 let tempConvert = TemperatureConverter(from: .kelvin, value: morn)
-                self._mornTemp = "\(tempConvert.celsius)°"
+                self._mornTemp = "\(Int(tempConvert.celsius))°"
             }
             if let day = temp["day"] as? Double {
                 let tempConvert = TemperatureConverter(from: .kelvin, value: day)
-                self._dayTemp = "\(tempConvert.celsius)°"
+                self._dayTemp = "\(Int(tempConvert.celsius))°"
             }
             if let eve = temp["eve"] as? Double {
                 let tempConvert = TemperatureConverter(from: .kelvin, value: eve)
-                self._eveTemp = "\(tempConvert.celsius)°"
+                self._eveTemp = "\(Int(tempConvert.celsius))°"
             }
             if let night = temp["night"] as? Double {
                 let tempConvert = TemperatureConverter(from: .kelvin, value: night)
-                self._nightTemp = "\(tempConvert.celsius)°"
+                self._nightTemp = "\(Int(tempConvert.celsius))°"
             }
         }
         
