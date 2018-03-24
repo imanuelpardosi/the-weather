@@ -6,9 +6,8 @@
 //  Copyright © 2018 moonshadow. All rights reserved.
 //
 
-protocol WeatherDelegate: class {
-    func sendTemperature(temp: [String])
-    func doSomething()
+protocol WeatherProtocol: class {
+    func updateMainUI()
 }
 
 enum CITY {
@@ -25,7 +24,7 @@ import Alamofire
 import GooglePlaces
 import JGProgressHUD
 
-class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelegate, GMSAutocompleteViewControllerDelegate {
+class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelegate, GMSAutocompleteViewControllerDelegate, WeatherProtocol {
 
     @IBOutlet weak var mainScrollView: UIScrollView!
     @IBOutlet weak var pageControl: UIPageControl!
@@ -35,7 +34,14 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     @IBOutlet weak var dayLabel: UILabel!
     @IBOutlet weak var timeScrollView: UIScrollView!
     @IBOutlet weak var timeLabel: UILabel!
+    
     @IBOutlet weak var currentWeatherLabel: UILabel!
+    @IBOutlet weak var minWeather: UILabel!
+    @IBOutlet weak var maxWeather: UILabel!
+    @IBOutlet weak var wind: UILabel!
+    @IBOutlet weak var humidity: UILabel!
+    @IBOutlet weak var pressure: UILabel!
+    @IBOutlet weak var clouds: UILabel!
     
     private var currentIndexDay: Int!
     private var currentIndexTime: Int!
@@ -56,20 +62,15 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     var newDayLabelArr: [UILabel] = [UILabel]()
     var newTimeLabelArr: [UILabel] = [UILabel]()
     let dayTimes: [String] = ["MORNING", "DAY", "EVENING", "NIGHT"]
-    var cities: [String] = ["JAKARTA", "LONDON", "PARIS", "BERLIN", "SEARCH CITY"]
+    var cities: [String] = ["MEDAN", "LONDON", "PARIS", "BERLIN", "SEARCH CITY"]
     let coordinate: [(Double, Double)] = [(0.0, 0.0), (51.5073509, -0.1277583), (48.856614, 2.3522219),(52.5200066, 13.404954)]
     
-    var isGetDataFinish: Bool = Bool()
-    
-    weak var weatherDelegate: WeatherDelegate?
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-    }
+    var isDataDownloaded: Bool = Bool()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        weatherVC = self
         self.view.showBlurLoader()
         
         locationManager.delegate = self
@@ -80,11 +81,20 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         self.mainScrollView.delegate = self
         self.dayScrollView.delegate = self
         self.timeScrollView.delegate = self
-        self.pageControl.currentPage = 0
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+
     }
     
     func getCities() -> [String] {
-        return cities
+        var removeLast = cities
+        removeLast.removeLast()
+        return removeLast
     }
     
     func getTemperature() -> [String] {
@@ -116,8 +126,33 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         return result
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-
+    func getWeatherType() -> [String] {
+        var result: [String] = [String]()
+        let currentHour = self.getCurrentTime()
+        
+        if currentHour <= 12 && currentHour >= 6 {
+            result.append(forecastsCurrentLocation[0].weatherType)
+            result.append(forecastsLondon[0].weatherType)
+            result.append(forecastsParis[0].weatherType)
+            result.append(forecastsBerlin[0].weatherType)
+        } else if currentHour <= 17 && currentHour >= 13 {
+            result.append(forecastsCurrentLocation[0].weatherType)
+            result.append(forecastsLondon[0].weatherType)
+            result.append(forecastsParis[0].weatherType)
+            result.append(forecastsBerlin[0].weatherType)
+        } else if currentHour <= 20 && currentHour >= 18 {
+            result.append(forecastsCurrentLocation[0].weatherType)
+            result.append(forecastsLondon[0].weatherType)
+            result.append(forecastsParis[0].weatherType)
+            result.append(forecastsBerlin[0].weatherType)
+        } else {
+            result.append(forecastsCurrentLocation[0].weatherType)
+            result.append(forecastsLondon[0].weatherType)
+            result.append(forecastsParis[0].weatherType)
+            result.append(forecastsBerlin[0].weatherType)
+        }
+        
+        return result
     }
     
     override func didReceiveMemoryWarning() {
@@ -126,8 +161,8 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation])
     {
-        if !isGetDataFinish {
-            self.isGetDataFinish = true
+        if !isDataDownloaded {
+            isDataDownloaded = true
             currentLocation = locations[0]
             
             Location.shareInstance.latitude = currentLocation.coordinate.latitude
@@ -144,6 +179,7 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
                     
                     if let city = placeMark.addressDictionary?["City"] as? NSString {
                         self.cities[0] = city.uppercased
+                        allCities = self.getCities()
                         self.navigationItem.title = self.cities[0]
                         print(city)
                     }
@@ -160,12 +196,12 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
                 self.downloadForecastData(lat: self.coordinate[1].0, long: self.coordinate[1].1, city: .London) {
                     self.downloadForecastData(lat: self.coordinate[2].0, long: self.coordinate[2].1, city: .Paris) {
                         self.downloadForecastData(lat: self.coordinate[3].0, long: self.coordinate[3].1, city: .Berlin) {
+                            allTemperature = self.getTemperature()
+                            allWeatherType = self.getWeatherType()
                             self.forecasts = self.forecastsCurrentLocation
                             hud.dismiss(afterDelay: 0.3)
                             self.updateMainUI()
                             self.view.removeBluerLoader()
-                            self.weatherDelegate?.doSomething()
-                            self.weatherDelegate?.sendTemperature(temp: self.getTemperature())
                         }
                     }
                 }
@@ -263,6 +299,28 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     
     func updateMainUI() {
         //weatherType.frame.origin.y = 25
+        
+        if setCurrentPage == nil {
+            self.pageControl.currentPage = 0
+        } else {
+            self.pageControl.currentPage = setCurrentPage
+            self.navigationItem.title = self.cities[Int(setCurrentPage)]
+            let offset: CGPoint = CGPoint(x: self.mainScrollView.frame.width * CGFloat(setCurrentPage), y: 0)
+            self.mainScrollView?.setContentOffset(offset, animated: true)
+            
+            if Int(setCurrentPage) == 0 {
+                forecasts = forecastsCurrentLocation
+            } else if Int(setCurrentPage) == 1 {
+                forecasts = forecastsLondon
+            } else if Int(setCurrentPage) == 2 {
+                forecasts = forecastsParis
+            } else if Int(setCurrentPage) == 3 {
+                forecasts = forecastsBerlin
+            } else if Int(setCurrentPage) == 4 {
+                forecasts = forecastsSearchCity
+            }
+        }
+       
         self.setupScrollViewSize()
         self.setCurrentWeather()
        
@@ -271,15 +329,15 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         //let scrollViewHeight: CGFloat = self.mainScrollView.frame.height
         
         let imgOne = UIImageView(frame: CGRect(x: self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
-        imgOne.image = UIImage(named: "CloudLighting")
+        imgOne.image = UIImage(named: "Clouds")
         let imgTwo = UIImageView(frame: CGRect(x: scrollViewWidth + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
         imgTwo.image = UIImage(named: "LightRain")
         let imgThree = UIImageView(frame: CGRect(x:scrollViewWidth * 2 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
-        imgThree.image = UIImage(named: "Rainy")
+        imgThree.image = UIImage(named: "Rain")
         let imgFour = UIImageView(frame: CGRect(x: scrollViewWidth * 3 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
-        imgFour.image = UIImage(named: "Windy")
+        imgFour.image = UIImage(named: "Wind")
         let imgFive = UIImageView(frame: CGRect(x: scrollViewWidth * 4 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
-        imgFive.image = UIImage(named: "Rainy")
+        imgFive.image = UIImage(named: "Rain")
         
         
         for i in 0..<pageControl.numberOfPages {
@@ -394,6 +452,12 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         let currentHour = getCurrentTime()
         
         if currentIndexTime != nil {
+            minWeather.text = forecasts[currentIndexDay].lowTemp
+            maxWeather.text = forecasts[currentIndexDay].highTemp
+            wind.text = forecasts[currentIndexDay].speed
+            humidity.text = forecasts[currentIndexDay].humidity
+            pressure.text = forecasts[currentIndexDay].pressure
+            clouds.text = forecasts[currentIndexDay].clouds
             if currentIndexTime == 0 {
                 currentWeatherLabel.text = forecasts[currentIndexDay].mornTemp
             } else if currentIndexTime == 1 {
@@ -405,6 +469,12 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
             }
         } else {
             print(currentHour)
+            minWeather.text = forecasts[0].lowTemp
+            maxWeather.text = forecasts[0].highTemp
+            wind.text = forecasts[0].speed
+            humidity.text = forecasts[0].humidity
+            pressure.text = forecasts[0].pressure
+            clouds.text = forecasts[0].clouds
             if currentHour <= 12 && currentHour >= 6 {
                 currentWeatherLabel.text = forecasts[0].mornTemp
             } else if currentHour <= 17 && currentHour >= 13 {

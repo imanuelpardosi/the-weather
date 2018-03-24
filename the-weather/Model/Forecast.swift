@@ -21,6 +21,8 @@ class Forecast {
     var _nightTemp: String!
     var _humidity: String!
     var _speed: String!
+    var _clouds: String!
+    var _pressure: String!
     
     var date: String {
         if _date == nil {
@@ -92,6 +94,20 @@ class Forecast {
         return _speed
     }
     
+    var clouds: String {
+        if _clouds == nil {
+            _clouds = ""
+        }
+        return _clouds
+    }
+    
+    var pressure: String {
+        if _pressure == nil {
+            _pressure = ""
+        }
+        return _pressure
+    }
+    
     init(weatherDict: Dictionary<String, AnyObject>) {
         if let temp = weatherDict["temp"] as? Dictionary<String, AnyObject> {
             if let min = temp["min"] as? Double {
@@ -122,11 +138,19 @@ class Forecast {
         }
         
         if let humidity = weatherDict["humidity"] as? Double {
-            self._humidity = "\(humidity)"
+            self._humidity = "\(humidity)%"
         }
         
         if let speed = weatherDict["speed"] as? Double {
-            self._speed = "\(speed)"
+            self._speed = "\(speed) m/s"
+        }
+        
+        if let clouds = weatherDict["clouds"] as? Double {
+            self._clouds = "\(clouds)%"
+        }
+        
+        if let pressure = weatherDict["pressure"] as? Double {
+            self._pressure = "\(Int(pressure)) hpa"
         }
         
         if let weather = weatherDict["weather"] as? [Dictionary<String, AnyObject>] {

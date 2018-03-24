@@ -12,6 +12,7 @@
 		C13AC412157776948F2A7AE1 /* Pods_the_weather.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A1E81F6242663C074A2C8B8 /* Pods_the_weather.framework */; };
 		DB1AEE942063E37A005956A5 /* RootVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB1AEE932063E37A005956A5 /* RootVC.swift */; };
 		DB1AEE992063E440005956A5 /* SideMenuVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB1AEE982063E440005956A5 /* SideMenuVC.swift */; };
+		DB1E668320664D51004CC2C7 /* GlobalVariable.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB1E668220664D51004CC2C7 /* GlobalVariable.swift */; };
 		DB63527520464D1400FEF37D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB63527420464D1400FEF37D /* AppDelegate.swift */; };
 		DB63527720464D1500FEF37D /* WeatherVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB63527620464D1500FEF37D /* WeatherVC.swift */; };
 		DB63527D20464D1500FEF37D /* the_weather.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = DB63527B20464D1500FEF37D /* the_weather.xcdatamodeld */; };
@@ -54,6 +55,8 @@
 		8A1E81F6242663C074A2C8B8 /* Pods_the_weather.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_the_weather.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB1AEE932063E37A005956A5 /* RootVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootVC.swift; sourceTree = "<group>"; };
 		DB1AEE982063E440005956A5 /* SideMenuVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuVC.swift; sourceTree = "<group>"; };
+		DB1E668220664D51004CC2C7 /* GlobalVariable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalVariable.swift; sourceTree = "<group>"; };
+		DB39B16E2066A5B000F0C667 /* Cera GR Light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Cera GR Light.otf"; sourceTree = "<group>"; };
 		DB63527120464D1400FEF37D /* the-weather.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "the-weather.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB63527420464D1400FEF37D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DB63527620464D1500FEF37D /* WeatherVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherVC.swift; sourceTree = "<group>"; };
@@ -130,8 +133,8 @@
 			isa = PBXGroup;
 			children = (
 				DB63527620464D1500FEF37D /* WeatherVC.swift */,
-				DB1AEE932063E37A005956A5 /* RootVC.swift */,
 				DB1AEE982063E440005956A5 /* SideMenuVC.swift */,
+				DB1AEE932063E37A005956A5 /* RootVC.swift */,
 				DB1AEE962063E3B2005956A5 /* Cell */,
 			);
 			path = ViewController;
@@ -151,8 +154,25 @@
 				DBFBD28B2047B6800011897E /* Constant.swift */,
 				DBFBD28D2047B6D50011897E /* Location.swift */,
 				DBFBD2912047B7720011897E /* Forecast.swift */,
+				DB1E668220664D51004CC2C7 /* GlobalVariable.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		DB39B1682066A0D500F0C667 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				DB39B1692066A0DF00F0C667 /* Font */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		DB39B1692066A0DF00F0C667 /* Font */ = {
+			isa = PBXGroup;
+			children = (
+				DB39B16E2066A5B000F0C667 /* Cera GR Light.otf */,
+			);
+			path = Font;
 			sourceTree = "<group>";
 		};
 		DB63526820464D1400FEF37D = {
@@ -180,6 +200,7 @@
 		DB63527320464D1400FEF37D /* the-weather */ = {
 			isa = PBXGroup;
 			children = (
+				DB39B1682066A0D500F0C667 /* Resources */,
 				DB1AEE972063E3C7005956A5 /* Model */,
 				DB1AEE952063E3A9005956A5 /* ViewController */,
 				DB63527420464D1400FEF37D /* AppDelegate.swift */,
@@ -518,6 +539,7 @@
 				DBFBD28E2047B6D50011897E /* Location.swift in Sources */,
 				DBB08671204D3B320046B1FF /* CityCell.swift in Sources */,
 				DB1AEE942063E37A005956A5 /* RootVC.swift in Sources */,
+				DB1E668320664D51004CC2C7 /* GlobalVariable.swift in Sources */,
 				DB1AEE992063E440005956A5 /* SideMenuVC.swift in Sources */,
 				DB63527520464D1400FEF37D /* AppDelegate.swift in Sources */,
 				DBFBD28C2047B6800011897E /* Constant.swift in Sources */,

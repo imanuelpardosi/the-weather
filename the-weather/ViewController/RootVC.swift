@@ -9,8 +9,8 @@
 import AKSideMenu
 
 class RootVC: AKSideMenu, AKSideMenuDelegate {
-    let weatherVC: WeatherVC = WeatherVC()
-    let sideMenuVC: SideMenuVC = SideMenuVC()
+    //let weatherVC: WeatherVC = WeatherVC()
+    var weatherProtocol: WeatherProtocol?
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -24,7 +24,7 @@ class RootVC: AKSideMenu, AKSideMenuDelegate {
         self.contentViewController = self.storyboard!.instantiateViewController(withIdentifier: "contentVC")
         self.leftMenuViewController = self.storyboard!.instantiateViewController(withIdentifier: "sideMenuVC")
         
-        self.weatherVC.weatherDelegate = sideMenuVC
+        
         self.delegate = self
     }
     
@@ -35,9 +35,6 @@ class RootVC: AKSideMenu, AKSideMenuDelegate {
     // MARK: - <AKSideMenuDelegate>
     public func sideMenu(_ sideMenu: AKSideMenu, willShowMenuViewController menuViewController: UIViewController) {
         print("willShowMenuViewController")
-        
-        self.weatherVC.weatherDelegate?.doSomething()
-        self.weatherVC.weatherDelegate?.sendTemperature(temp: ["21", "21", "21", "21"])
     }
     
     public func sideMenu(_ sideMenu: AKSideMenu, didShowMenuViewController menuViewController: UIViewController) {
@@ -45,6 +42,11 @@ class RootVC: AKSideMenu, AKSideMenuDelegate {
     }
     
     public func sideMenu(_ sideMenu: AKSideMenu, willHideMenuViewController menuViewController: UIViewController) {
+        
+        self.weatherProtocol = weatherVC
+        self.weatherProtocol?.updateMainUI()
+        
+        
         print("willHideMenuViewController")
     }
     
@@ -52,3 +54,4 @@ class RootVC: AKSideMenu, AKSideMenuDelegate {
         print("didHideMenuViewController")
     }
 }
+
