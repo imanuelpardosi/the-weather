@@ -53,6 +53,12 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     var forecastsBerlin = [Forecast]()
     var forecastsSearchCity = [Forecast]()
     
+    var imgOne: UIImageView!
+    var imgTwo: UIImageView!
+    var imgThree: UIImageView!
+    var imgFour: UIImageView!
+    var imgFive: UIImageView!
+    
     @IBOutlet weak var btnMenu: UIButton!
     @IBOutlet weak var btnSearch: UIButton!
     var locationManager = CLLocationManager()
@@ -69,6 +75,11 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        weatherType.addCharactersSpacing(value: 10)
+
+        self.navigationController?.navigationBar.titleTextAttributes =
+            [NSAttributedStringKey.foregroundColor: #colorLiteral(red: 0.2566935718, green: 0.3841508329, blue: 0.4642606378, alpha: 1),
+             NSAttributedStringKey.font: Font.setCustomFont(fontType: .HindMedium, fontSize: 20)]
         
         weatherVC = self
         self.view.showBlurLoader()
@@ -106,12 +117,12 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
             result.append(forecastsLondon[0].mornTemp)
             result.append(forecastsParis[0].mornTemp)
             result.append(forecastsBerlin[0].mornTemp)
-        } else if currentHour <= 17 && currentHour >= 13 {
+        } else if currentHour <= 16 && currentHour >= 13 {
             result.append(forecastsCurrentLocation[0].dayTemp)
             result.append(forecastsLondon[0].dayTemp)
             result.append(forecastsParis[0].dayTemp)
             result.append(forecastsBerlin[0].dayTemp)
-        } else if currentHour <= 20 && currentHour >= 18 {
+        } else if currentHour <= 20 && currentHour >= 17 {
             result.append(forecastsCurrentLocation[0].eveTemp)
             result.append(forecastsLondon[0].eveTemp)
             result.append(forecastsParis[0].eveTemp)
@@ -130,17 +141,17 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         var result: [String] = [String]()
         let currentHour = self.getCurrentTime()
         
-        if currentHour <= 12 && currentHour >= 6 {
+        if currentHour <= 10 && currentHour >= 4 {
             result.append(forecastsCurrentLocation[0].weatherType)
             result.append(forecastsLondon[0].weatherType)
             result.append(forecastsParis[0].weatherType)
             result.append(forecastsBerlin[0].weatherType)
-        } else if currentHour <= 17 && currentHour >= 13 {
+        } else if currentHour <= 16 && currentHour >= 11 {
             result.append(forecastsCurrentLocation[0].weatherType)
             result.append(forecastsLondon[0].weatherType)
             result.append(forecastsParis[0].weatherType)
             result.append(forecastsBerlin[0].weatherType)
-        } else if currentHour <= 20 && currentHour >= 18 {
+        } else if currentHour <= 20 && currentHour >= 17 {
             result.append(forecastsCurrentLocation[0].weatherType)
             result.append(forecastsLondon[0].weatherType)
             result.append(forecastsParis[0].weatherType)
@@ -298,7 +309,21 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     }
     
     func updateMainUI() {
-        //weatherType.frame.origin.y = 25
+        var weatherIconTopConstraint: CGFloat = 20.0
+        var iconSize: CGFloat = 100
+        var increaseX: CGFloat = 0
+        print("self.modelIdentifier(): \(self.modelIdentifier())")
+        if self.modelIdentifier().contains("iPhone8,4") || self.modelIdentifier().contains("iPhone6") {
+            weatherType.frame.origin.y = 0
+            weatherIconTopConstraint = 0
+            iconSize = 70
+            increaseX = 15
+        } else if self.modelIdentifier().contains("iPhone10,3") || self.modelIdentifier().contains("iPhone10,5") || self.modelIdentifier().contains("iPhone9,2") || self.modelIdentifier().contains("iPhone7,1") || self.modelIdentifier().contains("iPhone8,2") {
+            weatherType.frame.origin.y = 30
+            iconSize = 170
+            increaseX = -35
+        }
+            
         
         if setCurrentPage == nil {
             self.pageControl.currentPage = 0
@@ -328,17 +353,25 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         let scrollViewWidth: CGFloat = self.mainScrollView.frame.width
         //let scrollViewHeight: CGFloat = self.mainScrollView.frame.height
         
-        let imgOne = UIImageView(frame: CGRect(x: self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
-        imgOne.image = UIImage(named: "Clouds")
-        let imgTwo = UIImageView(frame: CGRect(x: scrollViewWidth + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
-        imgTwo.image = UIImage(named: "LightRain")
-        let imgThree = UIImageView(frame: CGRect(x:scrollViewWidth * 2 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
-        imgThree.image = UIImage(named: "Rain")
-        let imgFour = UIImageView(frame: CGRect(x: scrollViewWidth * 3 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
-        imgFour.image = UIImage(named: "Wind")
-        let imgFive = UIImageView(frame: CGRect(x: scrollViewWidth * 4 + self.mainScrollView.center.x - 50, y: weatherType.frame.maxY + 20, width: 100, height: 100))
-        imgFive.image = UIImage(named: "Rain")
+        imgOne = UIImageView(frame: CGRect(x: self.mainScrollView.center.x - 50 + increaseX, y: weatherType.frame.maxY + weatherIconTopConstraint, width: iconSize, height: iconSize))
+        imgOne.image = UIImage(named: "\(forecastsCurrentLocation[0].weatherType)")
+        imgOne.contentMode = .scaleAspectFit
         
+        imgTwo = UIImageView(frame: CGRect(x: scrollViewWidth + self.mainScrollView.center.x - 50 + increaseX, y: weatherType.frame.maxY + weatherIconTopConstraint, width: iconSize, height: iconSize))
+        imgTwo.image = UIImage(named: "\(forecastsLondon[0].weatherType)")
+        imgTwo.contentMode = .scaleAspectFit
+        
+        imgThree = UIImageView(frame: CGRect(x:scrollViewWidth * 2 + self.mainScrollView.center.x - 50 + increaseX, y: weatherType.frame.maxY + weatherIconTopConstraint, width: iconSize, height: iconSize))
+        imgThree.image = UIImage(named: "\(forecastsParis[0].weatherType)")
+        imgThree.contentMode = .scaleAspectFit
+        
+        imgFour = UIImageView(frame: CGRect(x: scrollViewWidth * 3 + self.mainScrollView.center.x - 50 + increaseX, y: weatherType.frame.maxY + weatherIconTopConstraint, width: iconSize , height: iconSize))
+        imgFour.image = UIImage(named: "\(forecastsBerlin[0].weatherType)")
+        imgFour.contentMode = .scaleAspectFit
+        
+        imgFive = UIImageView(frame: CGRect(x: scrollViewWidth * 4 + self.mainScrollView.center.x - 50 + increaseX, y: weatherType.frame.maxY + weatherIconTopConstraint, width: iconSize, height: iconSize))
+        imgFive.image = UIImage(named: "\(forecastsBerlin[0].weatherType)")
+        imgFive.contentMode = .scaleAspectFit
         
         for i in 0..<pageControl.numberOfPages {
             if i == 0 {
@@ -384,6 +417,11 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
             } else if i == 4 {
                 let newWeatherType = UILabel()
                 weatherType.text = "HOW'S YOUR FAVORITE CITY?"
+                newWeatherType.adjustsFontSizeToFitWidth = true
+                newWeatherType.numberOfLines = 1
+                newWeatherType.minimumScaleFactor = 0.2
+                newWeatherType.lineBreakMode = NSLineBreakMode.byWordWrapping
+                
                 newWeatherType.textAlignment = .center
                 newWeatherType.frame = weatherType.frame
                 newWeatherType.center.x = self.view.center.x + (scrollViewWidth * CGFloat(i))
@@ -430,19 +468,24 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
         if Int(pageControl.currentPage) == 0 {
             weatherType.text = forecastsCurrentLocation[currentIndexDay].weatherType.uppercased()
             newWeatherTypeArr[Int(pageControl.currentPage)].attributedText = weatherType.attributedText
+            imgOne.image = UIImage(named: "\(forecastsCurrentLocation[currentIndexDay].weatherType)")
         } else if Int(pageControl.currentPage) == 1 {
             weatherType.text = forecastsLondon[currentIndexDay].weatherType.uppercased()
             newWeatherTypeArr[Int(pageControl.currentPage)].attributedText = weatherType.attributedText
+            imgTwo.image = UIImage(named: "\(forecastsLondon[currentIndexDay].weatherType)")
         } else if Int(pageControl.currentPage) == 2 {
             weatherType.text = forecastsParis[currentIndexDay].weatherType.uppercased()
             newWeatherTypeArr[Int(pageControl.currentPage)].attributedText = weatherType.attributedText
+            imgThree.image = UIImage(named: "\(forecastsParis[currentIndexDay].weatherType)")
         } else if Int(pageControl.currentPage) == 3 {
             weatherType.text = forecastsBerlin[currentIndexDay].weatherType.uppercased()
             newWeatherTypeArr[Int(pageControl.currentPage)].attributedText = weatherType.attributedText
+            imgFour.image = UIImage(named: "\(forecastsBerlin[currentIndexDay].weatherType)")
         }  else if Int(pageControl.currentPage) == 4 {
             print(forecastsSearchCity[currentIndexDay].weatherType.uppercased())
             weatherType.text = forecastsSearchCity[currentIndexDay].weatherType.uppercased()
             newWeatherTypeArr[Int(pageControl.currentPage)].attributedText = weatherType.attributedText
+            imgFive.image = UIImage(named: "\(forecastsSearchCity[currentIndexDay].weatherType)")
             
             print(newWeatherTypeArr[Int(pageControl.currentPage)].frame)
         }
@@ -475,13 +518,13 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
             humidity.text = forecasts[0].humidity
             pressure.text = forecasts[0].pressure
             clouds.text = forecasts[0].clouds
-            if currentHour <= 12 && currentHour >= 6 {
+            if currentHour <= 10 && currentHour >= 4 {
                 currentWeatherLabel.text = forecasts[0].mornTemp
-            } else if currentHour <= 17 && currentHour >= 13 {
+            } else if currentHour <= 16 && currentHour >= 11 {
                 currentWeatherLabel.text = forecasts[0].dayTemp
                 let bottomOffset: CGPoint = CGPoint(x: self.timeScrollView.frame.width * 1, y: 0)
                 self.timeScrollView?.setContentOffset(bottomOffset, animated: true)
-            } else if currentHour <= 20 && currentHour >= 18 {
+            } else if currentHour <= 20 && currentHour >= 17 {
                 currentWeatherLabel.text = forecasts[0].eveTemp
                 let bottomOffset: CGPoint = CGPoint(x: self.timeScrollView.frame.width * 2, y: 0)
                 self.timeScrollView?.setContentOffset(bottomOffset, animated: true)
@@ -494,13 +537,12 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     }
     
     func getCurrentTime() -> Int {
-        var currentHour:Int
-        let date = NSDate()
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH"
-        currentHour = Int(dateFormatter.string(from: date as Date))!
+        let today=Date()
+        var calendar = Calendar.current
+        calendar.timeZone = .current
+        let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: today)
         
-        return currentHour
+        return components.hour!
     }
     
     @IBAction func onClickSearch(_ sender: Any) {
@@ -538,6 +580,13 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
     
     func wasCancelled(_ viewController: GMSAutocompleteViewController) {
         self.dismiss(animated: true, completion: nil)
+    }
+    
+    func modelIdentifier() -> String {
+        if let simulatorModelIdentifier = ProcessInfo().environment["SIMULATOR_MODEL_IDENTIFIER"] { return simulatorModelIdentifier }
+        var sysinfo = utsname()
+        uname(&sysinfo) // ignore return value
+        return String(bytes: Data(bytes: &sysinfo.machine, count: Int(_SYS_NAMELEN)), encoding: .ascii)!.trimmingCharacters(in: .controlCharacters)
     }
 }
 
@@ -597,6 +646,15 @@ extension UIView {
     func removeBluerLoader() {
         self.subviews.flatMap {  $0 as? UIVisualEffectView }.forEach {
             $0.removeFromSuperview()
+        }
+    }
+}
+
+extension UILabel {
+    func addCharactersSpacing(value: CGFloat) {
+        if let textString = text {
+            let attrs: [NSAttributedStringKey : Any] = [.kern: value]
+            attributedText = NSAttributedString(string: textString, attributes: attrs)
         }
     }
 }

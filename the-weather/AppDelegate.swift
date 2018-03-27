@@ -23,6 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UINavigationBar.appearance().barTintColor = #colorLiteral(red: 0.9688121676, green: 0.9688346982, blue: 0.9688225389, alpha: 1)
         UINavigationBar.appearance().isTranslucent = false
         UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default)
+        UINavigationBar.appearance().tintColor = #colorLiteral(red: 0.2566935718, green: 0.3841508329, blue: 0.4642606378, alpha: 1)
         
         GMSPlacesClient.provideAPIKey("AIzaSyBqhl5SYYO3tux_V58y8clJ765eXvQJmUM")
         return true

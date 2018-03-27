@@ -52,7 +52,9 @@
 	<string>We need your location to give you relevant, up-to-date weather information.</string>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Cera GR Light</string>
+		<string>Hind-Light</string>
+		<string>Hind-Medium</string>
+		<string>Hind-Regular</string>
 	</array>
 </dict>
 </plist>
