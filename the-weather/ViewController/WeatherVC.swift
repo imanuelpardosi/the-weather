@@ -501,6 +501,7 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
             humidity.text = forecasts[currentIndexDay].humidity
             pressure.text = forecasts[currentIndexDay].pressure
             clouds.text = forecasts[currentIndexDay].clouds
+            
             if currentIndexTime == 0 {
                 currentWeatherLabel.text = forecasts[currentIndexDay].mornTemp
             } else if currentIndexTime == 1 {
@@ -512,12 +513,14 @@ class WeatherVC: UIViewController, UIScrollViewDelegate, CLLocationManagerDelega
             }
         } else {
             print(currentHour)
+            
             minWeather.text = forecasts[0].lowTemp
             maxWeather.text = forecasts[0].highTemp
             wind.text = forecasts[0].speed
             humidity.text = forecasts[0].humidity
             pressure.text = forecasts[0].pressure
             clouds.text = forecasts[0].clouds
+            
             if currentHour <= 10 && currentHour >= 4 {
                 currentWeatherLabel.text = forecasts[0].mornTemp
             } else if currentHour <= 16 && currentHour >= 11 {
@@ -620,6 +623,14 @@ extension WeatherVC
         if forecasts.count != 0 {
             self.setCurrentWeather()
             self.setWeatherType()
+        } else {
+            minWeather.text = "0°"
+            maxWeather.text = "0°"
+            wind.text = "0.0 m/s"
+            humidity.text = "0%"
+            pressure.text = "0.0 hpa"
+            clouds.text = "0%"
+            currentWeatherLabel.text = "0°"
         }
     }
     

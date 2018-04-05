@@ -44,6 +44,11 @@ class RootVC: AKSideMenu, AKSideMenuDelegate {
     public func sideMenu(_ sideMenu: AKSideMenu, willHideMenuViewController menuViewController: UIViewController) {
         
         self.weatherProtocol = weatherVC
+        weatherVC.imgOne.removeFromSuperview()
+        weatherVC.imgTwo.removeFromSuperview()
+        weatherVC.imgThree.removeFromSuperview()
+        weatherVC.imgFour.removeFromSuperview()
+        weatherVC.imgFive.removeFromSuperview()
         self.weatherProtocol?.updateMainUI()
         
         
